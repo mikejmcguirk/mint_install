@@ -126,7 +126,14 @@ if [[ "$fresh_install" == true ]] ; then
     git config --global user.email "mike.j.mcguirk@gmail.com"
     # Rebase can do goofy stuff
     git config --global pull.rebase false
-    git config --global credential.helper libsecret
+
+    # libsecret-1-0 already installed
+    sudo apt install libsecret-1-dev
+    libsecret_path="/usr/share/doc/git/contrib/credential/libsecret"
+    cd $libsecret_path
+    sudo make
+    git config --global credential.helper $libsecret_path/git-credential-libsecret
+    cd "$HOME"
 fi
 
 ###########
@@ -149,6 +156,8 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y qbittorrent
     sudo apt install -y kolourpaint
     sudo apt remove -y drawing
+    sudo apt remove -y mintupdate
+    sudo apt remove -y timeshift
     # sudo apt install -y evince
     # sudo apt install -y thunar
     # sudo apt install -y eog
@@ -620,6 +629,7 @@ fi
 if [[ "$fresh_install" == true ]]; then
     curl -fsS https://dl.brave.com/install.sh | sh
 fi
+sudo apt remove -y firefox
 
 ########
 # Neovim
@@ -836,9 +846,12 @@ EOF
 
     pipx install nvitop
     pipx install beautysh
+    pipx runpip beautysh install setuptools
     pipx install ruff
     pipx install python-lsp-server[all]
 fi
+
+pipx upgrade-all
 
 ######################
 # Javascript Ecosystem
