@@ -1,0 +1,2 @@
+- This script assumes you select install media drivers during Mint's installation
+- This script removes multiple default Mint programs
