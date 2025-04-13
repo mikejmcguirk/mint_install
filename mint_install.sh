@@ -88,7 +88,6 @@ sudo apt upgrade -y
 # TODO: Figure out a way to give gnome-disks permission to mount disks without sudo
 
 if [[ "$fresh_install" == true ]] ; then
-    sudo apt install -y xclip # For copy/paste out of Neovim
     sudo apt install -y fd-find
     sudo apt install -y fzf
     sudo apt install -y vim
@@ -256,47 +255,47 @@ fi
 # rofi
 ######
 
-# if [[ "$fresh_install" == true ]] ; then
-#     sudo apt install -y rofi
-#
-#     # We want to be able to reboot and shutdown from Rofi
-#     if ! getent group sudo > /dev/null; then
-#         echo "Error: The 'sudo' group does not exist on this system"
-#         echo "Please create the group or modify the script to use a different group/username"
-#         exit 1
-#     fi
-#
-#     reboot_shutdown_file="/etc/sudoers.d/reboot-shutdown"
-#     if ! sudo touch "$reboot_shutdown_file"; then
-#         echo "Failed to create $reboot_shutdown_file"
-#         exit 1
-#     fi
-#
-#     if ! echo "%sudo ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" | sudo tee "$reboot_shutdown_file" > /dev/null; then
-#         echo "Failed to write to $reboot_shutdown_file"
-#         sudo rm -f "$reboot_shutdown_file"
-#         exit 1
-#     fi
-#
-#     if ! sudo chmod 440 "$reboot_shutdown_file"; then
-#         echo "Failed to set permissions on $reboot_shutdown_file"
-#         sudo rm -f "$reboot_shutdown_file"
-#         exit 1
-#     fi
-#
-#     if ! sudo visudo -c -f "$reboot_shutdown_file"; then
-#         echo "Syntax check failed for $reboot_shutdown_file"
-#         sudo rm -f "$reboot_shutdown_file"
-#         exit 1
-#     fi
-#
-#     cat << EOF >> "$HOME/.bashrc"
-#
-#     export PATH="\$PATH:/sbin"
-#     EOF
-#
-#     echo "Successfully configured $reboot_shutdown_file"
-# fi
+if [[ "$fresh_install" == true ]] ; then
+    sudo apt install -y rofi
+
+    # We want to be able to reboot and shutdown from Rofi
+    if ! getent group sudo > /dev/null; then
+        echo "Error: The 'sudo' group does not exist on this system"
+        echo "Please create the group or modify the script to use a different group/username"
+        exit 1
+    fi
+
+    reboot_shutdown_file="/etc/sudoers.d/reboot-shutdown"
+    if ! sudo touch "$reboot_shutdown_file"; then
+        echo "Failed to create $reboot_shutdown_file"
+        exit 1
+    fi
+
+    if ! echo "%sudo ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" | sudo tee "$reboot_shutdown_file" > /dev/null; then
+        echo "Failed to write to $reboot_shutdown_file"
+        sudo rm -f "$reboot_shutdown_file"
+        exit 1
+    fi
+
+    if ! sudo chmod 440 "$reboot_shutdown_file"; then
+        echo "Failed to set permissions on $reboot_shutdown_file"
+        sudo rm -f "$reboot_shutdown_file"
+        exit 1
+    fi
+
+    if ! sudo visudo -c -f "$reboot_shutdown_file"; then
+        echo "Syntax check failed for $reboot_shutdown_file"
+        sudo rm -f "$reboot_shutdown_file"
+        exit 1
+    fi
+
+    cat << EOF >> "$HOME/.bashrc"
+
+export PATH="\$PATH:/sbin"
+EOF
+
+    echo "Successfully configured $reboot_shutdown_file"
+fi
 
 #####################################
 # i3lock-color (betterlockscreen dep)
@@ -466,8 +465,6 @@ if [[ "$fresh_install" == true || "$bls_update" == true ]]; then
     wget $bls_url -O - -q | bash -s user $bls_tag
 fi
 
-# TODO: Add --display primary to run cmd
-
 #########
 # Spotify
 #########
@@ -538,8 +535,6 @@ sudo apt remove -y firefox
 # Neovim
 ########
 
-# TODO: I think this is needed because of the neovim-python installation
-# Confirm that. Do I really need that installation?
 # Dumb hack
 sudo apt remove -y neovim
 bad_neovim_dir="$HOME/.config/neovim"
@@ -565,6 +560,10 @@ done
 
 nvim_root_dir="/opt"
 nvim_install_dir="$nvim_root_dir/nvim-linux-x86_64"
+
+if [[ "$fresh_install" == true ]]; then
+    sudo apt install -y xclip # For copy/paste
+fi
 
 if [[ "$fresh_install" == true || "$nvim_update" == true ]]; then
     if [ -z "$nvim_url" ] || [ -z "$nvim_tar" ] ; then
