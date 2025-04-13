@@ -235,6 +235,9 @@ EOF
     # [ ! -d "$pam_d_dir" ] && mkdir -p "$pam_d_dir"
     # sudo cp "$conf_dir/templates/login" "$pam_d_dir"
 
+    chmod +x "$HOME/.config/i3-exit.sh"
+    chmod +x "$HOME/.config/i3-lock-script.sh"
+    chmod +x "$HOME/.config/lock-if-idle.sh"
     chmod +x "$HOME/.config/polybar/launch-polybar"
     chmod +x "$HOME/.config/start-redshift.sh"
     chmod +x "$HOME/.local/bin/maim-script.sh"
@@ -273,82 +276,21 @@ fi
 # Window Manager
 ################
 
-# if [[ "$fresh_install" == true ]] ; then
-#     # Xserver
-#     sudo apt install -y xorg
-#
-#     # Wm
-#     sudo apt install -y i3
-#     sudo apt install -y i3-wm # Because sure why not
-#
-#     # Wallpaper/compositing
-#     sudo apt install -y feh
-#     sudo apt install -y picom
-#
-#     # polybar
-#     sudo apt install -y polybar
-#     sudo apt install -y psmisc # For killall
-#
-#     # Backend
-#     sudo apt install -y dbus
-#     sudo apt install -y dbus-x11
-#
-#     sudo apt install -y upower # Brave uses this to check laptop power
-#     # Brave complains/has dbus issues if it cannot see the policykit user
-#     # Reinstall to make sure it's there
-#     sudo apt install -y policykit-1
-#     sudo apt install -y at-spi2-core # Re-installation also seems to help with this
-#     sudo apt install -y libpam-gnome-keyring # This should already be installed but let's be safe
+if [[ "$fresh_install" == true ]] ; then
+    sudo apt install -y i3
+    sudo apt install -y xautolock
+    sudo apt install -y playerctl
 
-# fi
+    # The dotfiles will set this to run as a service and import the defalt filtering
+    # Manually assign the preset to autostart if needed
+    sudo apt install -y easyeffects
 
-################
-# nVidia Drivers
-################
+    sudo apt install -y feh
+    # TODO: Seeing screen tearing. Look into this
+    sudo apt install -y picom
 
-# Note: This only gets you setup to perform the checks manually
-# Leaving this not fully automated for now because I do not have hardware I can use purely
-# for testing
-
-
-# if [[ "$fresh_install" == true ]] ; then
-#     sources_file="/etc/apt/sources.list"
-#     backup_file="/etc/apt/sources.list.bak.$(date +%Y%m%d_%H%M%S)"
-#     original_line="deb http://deb.debian.org/debian/ bookworm main non-free-firmware"
-#     new_line="deb http://deb.debian.org/debian/ bookworm main non-free-firmware contrib non-free"
-#
-#     if [ ! -f "$sources_file" ]; then
-#         echo "Error: $sources_file does not exist"
-#         # We have seriously problems if apt sources isn't present
-#         exit 1
-#     fi
-#
-#     sudo cp "$sources_file" "$backup_file"
-#     if [ $? -eq 0 ]; then
-#         echo "Backup created at $backup_file"
-#     else
-#         echo "Error: Failed to create backup for apt sources"
-#         # Do not continue if we cannot backup apt sources
-#         exit 1
-#     fi
-#
-#     sudo sed -i "s|$original_line|$new_line|" "$sources_file"
-#     if [ $? -eq 0 ]; then
-#         echo "Successfully updated $sources_file"
-#     else
-#         echo "Error: Failed to update $sources_file"
-#         exit 1
-#     fi
-#
-#     sudo apt update
-#     sudo apt install -y linux-headers-$(uname -r)
-#     sudo apt install -y libglvnd-dev
-#     # These are repeats, but here for documentary purposes
-#     sudo apt install -y build-essential
-#     sudo apt install -y pkg-config
-#
-#     sudo apt install -y nvidia-detect
-# fi
+    sudo apt install -y polybar
+fi
 
 ######
 # rofi
