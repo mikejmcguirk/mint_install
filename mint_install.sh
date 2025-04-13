@@ -26,7 +26,7 @@ fi
 
 fresh_install=false
 
-# echo "Install script for Debian 12 i3 startx system"
+echo "Install script for Linux Mint Xia with i3"
 echo "Before running this, run sudo apt update, upgrade, autoremove, and autoclean"
 echo "This might be necessary to make kernel updates install"
 echo ""
@@ -54,7 +54,7 @@ fi
 
 if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y ufw
-    sudo apt remove -y gufw
+    sudo apt remove -y gufw # Mint thing
 
     sudo ufw default deny incoming # Should be default, but let's be sure
     sudo ufw default allow outgoing # Also should be default
@@ -94,16 +94,9 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y vim
     sudo apt install -y sqlite3
     sudo apt install -y virtualbox
-    # sudo apt install -y maim
+    sudo apt install -y maim
     # sudo apt install -y libglib2.0-bin
-    # NOTE: The Debian repo has a couple tools for reading perf off of Rust source code
-    # At least for now, I'm going to avoid speculatively installing them
-    # They can be checked with apt search linux-perf
-    # sudo apt install -y linux-perf
-    # echo "kernel.perf_event_paranoid = -1" | sudo tee /etc/sysctl.conf
-    #
-    # systemctl --user start dconf.service
-    # gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+    echo "kernel.perf_event_paranoid = -1" | sudo tee /etc/sysctl.conf
 fi
 
 ###########
@@ -142,6 +135,7 @@ fi
 
 if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y wireguard
+    # resolvconf is a service in Mint Xia
     sudo apt install -y natpmpc
 fi
 
@@ -158,46 +152,40 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt remove -y drawing
     sudo apt remove -y mintupdate
     sudo apt remove -y timeshift
-    # sudo apt install -y evince
-    # sudo apt install -y thunar
-    # sudo apt install -y eog
-    # sudo apt install -y gtk2-engines-murrine
-    # sudo apt install -y arc-theme
+    # sudo apt install -y evince # maybe?
 fi
-
-# TODO: How do we script opening with eog from Thunar by default?
 
 ##########
 # Redshift
 ##########
 
-# if [[ "$fresh_install" == true ]] ; then
-#     sudo apt install -y redshift-gtk
-#     sudo systemctl disable geoclue
-#
-#     [ ! -d "$conf_dir" ] && mkdir -p "$conf_dir"
-#     redshift_conf_file="$conf_dir/redshift.conf"
-#
-#     # lat and lon are set for zero to avoid dox
-#     echo "Writing Redshift configuration to $redshift_conf_file..."
-#     if cat << 'EOF' > "$redshift_conf_file"
-#         [redshift]
-#         temp-day=6500
-#         temp-night=4000
-#         adjustment-method=randr
-#         location-provider=manual
-#
-#         [manual]
-#         lat=00.0000
-#         lon=00.0000
-#         EOF
-#     then
-#         echo "Successfully wrote to $redshift_conf_file"
-#     else
-#         echo "Error: Failed to write to $redshift_conf_file"
-#         exit 1
-#     fi
-# fi
+if [[ "$fresh_install" == true ]] ; then
+    sudo apt install -y redshift-gtk
+    sudo systemctl disable geoclue
+
+    [ ! -d "$conf_dir" ] && mkdir -p "$conf_dir"
+    redshift_conf_file="$conf_dir/redshift.conf"
+
+    # lat and lon are set for zero to avoid dox
+    echo "Writing Redshift configuration to $redshift_conf_file..."
+    if cat << 'EOF' > "$redshift_conf_file"
+[redshift]
+temp-day=6500
+temp-night=4000
+adjustment-method=randr
+location-provider=manual
+
+[manual]
+lat=00.0000
+lon=00.0000
+EOF
+    then
+        echo "Successfully wrote to $redshift_conf_file"
+    else
+        echo "Error: Failed to write to $redshift_conf_file"
+        exit 1
+    fi
+fi
 
 ##############
 # Get Dotfiles
@@ -226,51 +214,15 @@ fi
 EOF
     fi
 
-    # old_login_file="/etc/pam.d/login"
-    # if [ -f $old_login_file ]; then
-    #     sudo rm $old_login_file
-    # fi
-    #
-    # pam_d_dir="/etc/pam.d"
-    # [ ! -d "$pam_d_dir" ] && mkdir -p "$pam_d_dir"
-    # sudo cp "$conf_dir/templates/login" "$pam_d_dir"
-
     chmod +x "$HOME/.config/i3-exit.sh"
     chmod +x "$HOME/.config/i3-lock-script.sh"
     chmod +x "$HOME/.config/lock-if-idle.sh"
     chmod +x "$HOME/.config/polybar/launch-polybar"
-    chmod +x "$HOME/.config/start-redshift.sh"
+    chmod +x "$HOME/.config/start-systray.sh"
+    chmod +x "$HOME/.local/bin/volume_up.sh"
     chmod +x "$HOME/.local/bin/maim-script.sh"
-    chmod +x "$HOME/.local/bin/rofi-scripts/rofi-power"
+    chmod +x "$HOME/.local/bin/rofi-scripts/rofi-power.sh"
 fi
-
-#############################
-# Gnome Keyring and libsecret
-#############################
-
-# To store Git tokens and stop Brave from trying to use KWallet
-
-# if [[ "$fresh_install" == true ]] ; then
-#     sudo apt install -y gnome-keyring
-#     sudo apt install -y libsecret-tools
-#     sudo apt install -y libsecret-1-0
-#     sudo apt install -y libsecret-1-dev
-# fi
-#
-# # TODO: Verify this works properly and fix weird Brave issue
-#
-# libsecret_path="/usr/share/doc/git/contrib/credential/libsecret"
-# cd $libsecret_path
-# sudo make
-# cd "$HOME"
-#
-# if [[ "$fresh_install" == true ]] ; then
-#     git config --global credential.helper libsecret
-#     cat << EOF >> "$HOME/.bashrc"
-#
-#     export PATH="\$PATH:$libsecret_path"
-#     EOF
-# fi
 
 ################
 # Window Manager
@@ -290,6 +242,14 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y picom
 
     sudo apt install -y polybar
+
+    # TODO: mintthemes can be installed
+    sudo apt install -y arc-theme
+    # TODO: put volume controls into i3
+    # The dotfiles have a default config and a backup incase it's overwritten
+    # Not actually sure I need this though if I can come up with a convenient way
+    # to open the cinnamon mixer
+    sudo apt install volumeicon-alsa
 fi
 
 ######
@@ -1278,8 +1238,7 @@ fi
 # Wrap Up
 #########
 
-# This is needed to make my Keychron function keys work properly on Linux Mint
-# Does not seem necessary on Debian, but keeping the code
+# Have had to run these before to make function keys work properly on Linux Mint
 # echo "options hid_apple fnmode=2" | sudo tee /etc/modprobe.d/hid_apple.conf
 # sudo update-initramfs -u
 
