@@ -298,174 +298,175 @@ fi
 #     echo "Successfully configured $reboot_shutdown_file"
 # fi
 
-##############
-# i3lock-color
-##############
+#####################################
+# i3lock-color (betterlockscreen dep)
+#####################################
 
-# Installed as a dep for betterlockscreen
+# NOTE: Would changes to this affect betterlockscreen?
 
-# i3lock_repo="https://github.com/Raymo111/i3lock-color"
-# i3lock_tag="2.13.c.5"
-#
-# i3lock_update=false
-# for arg in "$@"; do
-#     if [[ "$arg" == "i3lock" ]]; then
-#         i3lock_update=true
-#         echo "Updating i3lock-color..."
-#
-#         break
-#     fi
-# done
-#
-# if [[ "$fresh_install" == true && "$i3lock_update" == true ]]; then
-#     echo "Cannot fresh install and update i3lock-color"
-#     exit 1
-# fi
-#
-# if [[ "$fresh_install" == true && "$i3lock_update" != true ]]; then
-#     echo "Installing i3lock-color..."
-# fi
-#
-# if [ "$fresh_install" == true ]; then
-#     sudo apt remove -y i3lock
-#
-#     # deps
-#     sudo apt install -y autoconf
-#     sudo apt install -y gcc
-#     sudo apt install -y make
-#     sudo apt install -y pkg-config
-#     sudo apt install -y libpam0g-dev
-#     sudo apt install -y libcairo2-dev
-#     sudo apt install -y libfontconfig1-dev
-#     sudo apt install -y libxcb-composite0-dev
-#     sudo apt install -y libev-dev
-#     sudo apt install -y libx11-xcb-dev
-#     sudo apt install -y libxcb-xkb-dev
-#     sudo apt install -y libxcb-xinerama0-dev
-#     sudo apt install -y libxcb-randr0-dev
-#     sudo apt install -y libxcb-image0-dev
-#     sudo apt install -y libxcb-util0-dev
-#     sudo apt install -y libxcb-xrm-dev
-#     sudo apt install -y libxkbcommon-dev
-#     sudo apt install -y libxkbcommon-x11-dev
-#     sudo apt install -y libjpeg-dev
-#     sudo apt install -y libgif-dev
-# fi
-#
-# i3_color_git_dir="$local_bin_dir/i3lock-color"
-# if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
-#     [ ! -d "$i3_color_git_dir" ] && mkdir -p "$i3_color_git_dir"
-#     cd "$i3_color_git_dir" || { echo "Error: Cannot cd to $i3_color_git_dir"; exit 1; }
-# fi
-#
-# if [ "$fresh_install" == true ]; then
-#     git clone "$i3lock_repo" "$i3_color_git_dir"
-# elif [ "$i3lock_update" == true ]; then
-#     git checkout master
-#     git pull
-# fi
-#
-# i3_color_build_dir="$i3_color_git_dir/build"
-# if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
-#     git checkout "$i3lock_tag" || { echo "Error: Cannot checkout $i3lock_tag"; exit 1; }
-#     ./install-i3lock-color.sh
-#     # for betterlockscreen
-#     mv "$i3_color_build_dir/i3lock" "$i3_color_build_dir/i3lock-color"
-#
-#     cd "$HOME"
-# fi
-#
-# if [[ "$fresh_install" == true ]] ; then
-#     cat << EOF >> "$HOME/.bashrc"
-#
-#     export PATH="\$PATH:$i3_color_build_dir"
-#     EOF
-# fi
+i3lock_repo="https://github.com/Raymo111/i3lock-color"
+i3lock_tag="2.13.c.5"
+
+i3lock_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "i3lock" ]]; then
+        i3lock_update=true
+        echo "Updating i3lock-color..."
+
+        break
+    fi
+done
+
+if [[ "$fresh_install" == true && "$i3lock_update" == true ]]; then
+    echo "Cannot fresh install and update i3lock-color"
+    exit 1
+fi
+
+if [[ "$fresh_install" == true && "$i3lock_update" != true ]]; then
+    echo "Installing i3lock-color..."
+fi
+
+sudo apt remove -y i3lock
+
+# deps
+if [ "$fresh_install" == true ]; then
+    sudo apt install -y autoconf
+    sudo apt install -y gcc
+    sudo apt install -y make
+    sudo apt install -y pkg-config
+    sudo apt install -y libpam0g-dev
+    sudo apt install -y libcairo2-dev
+    sudo apt install -y libfontconfig1-dev
+    sudo apt install -y libxcb-composite0-dev
+    sudo apt install -y libev-dev
+    sudo apt install -y libx11-xcb-dev
+    sudo apt install -y libxcb-xkb-dev
+    sudo apt install -y libxcb-xinerama0-dev
+    sudo apt install -y libxcb-randr0-dev
+    sudo apt install -y libxcb-image0-dev
+    sudo apt install -y libxcb-util0-dev
+    sudo apt install -y libxcb-xrm-dev
+    sudo apt install -y libxkbcommon-dev
+    sudo apt install -y libxkbcommon-x11-dev
+    sudo apt install -y libjpeg-dev
+    sudo apt install -y libgif-dev
+fi
+
+i3_color_git_dir="$HOME/.local/bin/i3lock-color"
+if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
+    [ ! -d "$i3_color_git_dir" ] && mkdir -p "$i3_color_git_dir"
+    cd "$i3_color_git_dir" || { echo "Error: Cannot cd to $i3_color_git_dir"; exit 1; }
+fi
+
+if [ "$fresh_install" == true ]; then
+    git clone "$i3lock_repo" "$i3_color_git_dir"
+elif [ "$i3lock_update" == true ]; then
+    git checkout master
+    git pull
+fi
+
+i3_color_build_dir="$i3_color_git_dir/build"
+if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
+    git checkout "$i3lock_tag" || { echo "Error: Cannot checkout $i3lock_tag"; exit 1; }
+    ./install-i3lock-color.sh
+    # for betterlockscreen
+    mv "$i3_color_build_dir/i3lock" "$i3_color_build_dir/i3lock-color"
+
+    cd "$HOME"
+fi
+
+if [[ "$fresh_install" == true ]] ; then
+    cat << EOF >> "$HOME/.bashrc"
+
+export PATH="\$PATH:$i3_color_build_dir"
+EOF
+fi
 
 ####################################
 # ImageMagick (betterlockscreen dep)
 ####################################
 
-# Last tag: 7.1.1-46
-# magick_repo="https://github.com/ImageMagick/ImageMagick"
-# magick_tag="7.1.1-46"
-# magick_update=false
-# for arg in "$@"; do
-#     if [[ "$arg" == "magick" ]]; then
-#         magick_update=true
-#         echo "Updating ImageMagick..."
-#
-#         break
-#     fi
-# done
-#
-# if [[ "$fresh_install" == true && "$magick_update" == true ]]; then
-#     echo "Cannot fresh install and update magick"
-#     exit 1
-# fi
-#
-# magick_git_dir="$local_bin_dir/magick"
-# if [[ "$fresh_install" == true || "$magick_update" == true ]]; then
-#     [ ! -d "$magick_git_dir" ] && mkdir -p "$magick_git_dir"
-#     cd "$magick_git_dir" || { echo "Error: Cannot cd to $magick_git_dir"; exit 1; }
-# fi
-#
-# if [[ "$fresh_install" == true ]]; then
-#     git clone $magick_repo "$magick_git_dir"
-# elif [[ "$magick_update" == true ]]; then
-#     git checkout main
-#     git pull
-# fi
-#
-# if [[ "$fresh_install" == true || "$magick_update" == true ]]; then
-#     git checkout "$magick_tag" || { echo "Error: Cannot checkout $magick_tag"; exit 1; }
-#     ./configure
-#     make
-#     sudo make install
-#     sudo ldconfig /usr/local/lib
-#
-#     cd "$HOME"
-# fi
+# NOTE: Would changes to this affect betterlockscreen?
+
+magick_repo="https://github.com/ImageMagick/ImageMagick"
+magick_tag="7.1.1-46"
+magick_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "magick" ]]; then
+        magick_update=true
+        echo "Updating ImageMagick..."
+
+        break
+    fi
+done
+
+if [[ "$fresh_install" == true && "$magick_update" == true ]]; then
+    echo "Cannot fresh install and update magick"
+    exit 1
+fi
+
+magick_git_dir="$HOME/.local/bin/magick"
+if [[ "$fresh_install" == true || "$magick_update" == true ]]; then
+    [ ! -d "$magick_git_dir" ] && mkdir -p "$magick_git_dir"
+    cd "$magick_git_dir" || { echo "Error: Cannot cd to $magick_git_dir"; exit 1; }
+fi
+
+if [[ "$fresh_install" == true ]]; then
+    git clone $magick_repo "$magick_git_dir"
+elif [[ "$magick_update" == true ]]; then
+    git checkout main
+    git pull
+fi
+
+if [[ "$fresh_install" == true || "$magick_update" == true ]]; then
+    git checkout "$magick_tag" || { echo "Error: Cannot checkout $magick_tag"; exit 1; }
+    ./configure
+    make
+    sudo make install
+    sudo ldconfig /usr/local/lib
+
+    cd "$HOME"
+fi
 
 ##################
 # betterlockscreen
 ##################
 
 # https://github.com/betterlockscreen/betterlockscreen
-# Last Tag: 4.4.0
-# The install script automatically picks the latest tag, but it is noted here for reference
 # The URL is outlined for readability. If the install/update command needs changed, handle below
-# bls_url="https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh"
-# bls_update=false
-# for arg in "$@"; do
-#     if [[ "$arg" == "bls" ]]; then
-#         bls_update=true
-#         echo "Updating betterlockscreen..."
-#
-#         break
-#     fi
-# done
-#
-# if [[ "$fresh_install" == true && "$bls_update" != true ]]; then
-#     echo "Installing betterlockscreen..."
-# fi
-#
-# if [[ "$fresh_install" == true ]]; then
-#     sudo apt install -y bc
-#     sudo apt install -y xautolock
-# fi
-#
-# # Note: The install script will fail if it fails to find any of the deps, including
-# # i3lock-color and ImageMagick
-# if [[ "$fresh_install" == true || "$bls_update" == true ]]; then
-#     if [ -z "$bls_url" ]; then
-#         echo "bls_url not set. Exiting..."
-#         exit 1
-#     fi
-#     wget $bls_url -O - -q | bash -s user latest
-# fi
+bls_url="https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh"
+bls_tag="4.4.0"
+bls_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "bls" ]]; then
+        bls_update=true
+        echo "Updating betterlockscreen..."
 
-# TODO: Why does this show on both monitors?
+        break
+    fi
+done
+
+if [[ "$fresh_install" == true && "$bls_update" != true ]]; then
+    echo "Installing betterlockscreen..."
+fi
+
+# deps
+if [[ "$fresh_install" == true ]]; then
+    sudo apt install -y bc
+    sudo apt install -y xautolock
+fi
+
+# Note: The install script will fail if it fails to find any of the deps, including
+# i3lock-color and ImageMagick
+if [[ "$fresh_install" == true || "$bls_update" == true ]]; then
+    if [ -z "$bls_url" ]; then
+        echo "bls_url not set. Exiting..."
+        exit 1
+    fi
+    wget $bls_url -O - -q | bash -s user $bls_tag
+fi
+
+# TODO: Add --display primary to run cmd
 
 #########
 # Spotify
@@ -980,6 +981,8 @@ fi
 #########
 # Ghostty
 #########
+
+# TODO: Look into the shell integrations
 
 zig_link="https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz"
 ziglang_dir="/opt/ziglang"
