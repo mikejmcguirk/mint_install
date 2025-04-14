@@ -65,7 +65,6 @@ if [[ "$fresh_install" == true ]] ; then
     [ ! -d "$ssh_dir" ] && mkdir -p "$ssh_dir"
     chmod 700 "$ssh_dir"
 
-    # FUTURE: There are settings that can be added as well to require stronger cryptography
     cat << 'EOF' > "$ssh_dir/config"
 Host *
 ServerAliveInterval 60
@@ -146,11 +145,10 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y libreoffice
     sudo apt install -y qbittorrent
     sudo apt install -y kolourpaint
+
     sudo apt remove -y drawing
     sudo apt remove -y mintupdate
     sudo apt remove -y timeshift
-    # TODO: Check this
-    # sudo apt install -y evince
 fi
 
 ##########
@@ -224,10 +222,8 @@ fi
 if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y i3
     sudo apt install -y xautolock
-    sudo apt install -y playerctl
+    sudo apt install -y playerctl # Detect playing media to avoid screen lock
 
-    # The dotfiles will set this to run as a service and import the defalt filtering
-    # Manually assign the preset to autostart if needed
     sudo apt install -y easyeffects
 
     sudo apt install -y feh
@@ -972,17 +968,15 @@ fi
 # Ghostty
 #########
 
-# TODO: Look into the shell integrations
+ghostty_repo="https://github.com/ghostty-org/ghostty"
+ghostty_tag="v1.1.3"
+ghostty_dir="$HOME/.local/bin/ghostty-git"
 
 zig_link="https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz"
 ziglang_dir="/opt/ziglang"
 zig_file=$(basename $zig_link)
 zig_filepath=$ziglang_dir/"$zig_file"
 zig_dir=$(basename "$zig_filepath" .tar.xz)
-
-ghostty_repo="https://github.com/ghostty-org/ghostty"
-ghostty_tag="v1.1.3"
-ghostty_dir="$HOME/.local/bin/ghostty-git"
 
 ghostty_update=false
 for arg in "$@"; do
@@ -1211,7 +1205,7 @@ if [[ "$fresh_install" == true ]] ; then
     #I don't know why, but rust-analyzer doesn't work unless you do this
     "$rustup_bin" component add rust-analyzer
     "$cargo_bin" install --features lsp --locked taplo-cli
-    "$cargo_bin" install stylua
+    "$cargo_bin" install stylua --features luajit
     "$cargo_bin" install tokei
     "$cargo_bin" install flamegraph
     "$cargo_bin" install --features 'pcre2' ripgrep # For Perl Compatible Regex
