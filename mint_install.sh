@@ -85,8 +85,6 @@ sudo apt upgrade -y
 # Utilities
 ###########
 
-# TODO: Figure out a way to give gnome-disks permission to mount disks without sudo
-
 if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y fd-find
     sudo apt install -y fzf
@@ -94,6 +92,7 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y sqlite3
     sudo apt install -y virtualbox
     sudo apt install -y maim
+    sudo apt install -y jq # To parse i3 window data for maim
     # sudo apt install -y libglib2.0-bin
     echo "kernel.perf_event_paranoid = -1" | sudo tee /etc/sysctl.conf
 fi
@@ -213,14 +212,9 @@ fi
 EOF
     fi
 
-    chmod +x "$HOME/.config/i3-exit.sh"
-    chmod +x "$HOME/.config/i3-lock-script.sh"
-    chmod +x "$HOME/.config/lock-if-idle.sh"
-    chmod +x "$HOME/.config/polybar/launch-polybar"
-    chmod +x "$HOME/.config/start-systray.sh"
-    chmod +x "$HOME/.local/bin/volume_up.sh"
-    chmod +x "$HOME/.local/bin/maim-script.sh"
-    chmod +x "$HOME/.local/bin/rofi-scripts/rofi-power.sh"
+    git --git-dir="$dotfile_dir" --work-tree="$HOME" ls-files | grep '\.sh$' | while read -r file; do
+        chmod +x "$HOME/$file"
+    done
 fi
 
 ################
@@ -237,18 +231,11 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y easyeffects
 
     sudo apt install -y feh
-    # TODO: Seeing screen tearing. Look into this
     sudo apt install -y picom
 
     sudo apt install -y polybar
 
-    # TODO: mintthemes can be installed
-    sudo apt install -y arc-theme
-    # TODO: put volume controls into i3
-    # The dotfiles have a default config and a backup incase it's overwritten
-    # Not actually sure I need this though if I can come up with a convenient way
-    # to open the cinnamon mixer
-    sudo apt install volumeicon-alsa
+    sudo apt install -y mint-themes # Should already be there but just to be sure
 fi
 
 ######
@@ -257,6 +244,8 @@ fi
 
 if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y rofi
+    sudo apt install -y maim # Use rofi as a wrapper for screenshots
+    sudo apt install -y xclip # For copying screenshots to clipboard
 
     # We want to be able to reboot and shutdown from Rofi
     if ! getent group sudo > /dev/null; then
@@ -451,6 +440,7 @@ fi
 
 # deps
 if [[ "$fresh_install" == true ]]; then
+    sudo apt install -y feh # for wallpaper
     sudo apt install -y bc
     sudo apt install -y xautolock
 fi
