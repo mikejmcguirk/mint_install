@@ -1064,11 +1064,13 @@ fi
 # Tmux
 ######
 
-sudo apt install -y bison
-sudo apt install -y libncurses-dev
-sudo apt install -y libevent-dev
-sudo apt install -y automake
-sudo apt install -y autoconf
+if [ "$fresh_install" = true ]; then
+    sudo apt install -y bison
+    sudo apt install -y libncurses-dev
+    sudo apt install -y libevent-dev
+    sudo apt install -y automake
+    sudo apt install -y autoconf
+fi
 
 tmux_url="https://github.com/tmux/tmux"
 tmux_branch="tmux-3.5a"
