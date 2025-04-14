@@ -91,9 +91,8 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y vim
     sudo apt install -y sqlite3
     sudo apt install -y virtualbox
-    sudo apt install -y maim
-    sudo apt install -y jq # To parse i3 window data for maim
-    # sudo apt install -y libglib2.0-bin
+
+    # perf would be installed here if needed
     echo "kernel.perf_event_paranoid = -1" | sudo tee /etc/sysctl.conf
 fi
 
@@ -150,7 +149,8 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt remove -y drawing
     sudo apt remove -y mintupdate
     sudo apt remove -y timeshift
-    # sudo apt install -y evince # maybe?
+    # TODO: Check this
+    # sudo apt install -y evince
 fi
 
 ##########
@@ -161,8 +161,8 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y redshift-gtk
     sudo systemctl disable geoclue
 
-    [ ! -d "$conf_dir" ] && mkdir -p "$conf_dir"
-    redshift_conf_file="$conf_dir/redshift.conf"
+    [ ! -d "$HOME/.config" ] && mkdir -p "$$HOME/.config"
+    redshift_conf_file="$HOME/.config/redshift.conf"
 
     # lat and lon are set for zero to avoid dox
     echo "Writing Redshift configuration to $redshift_conf_file..."
@@ -246,6 +246,7 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y rofi
     sudo apt install -y maim # Use rofi as a wrapper for screenshots
     sudo apt install -y xclip # For copying screenshots to clipboard
+    sudo apt install -y jq # To parse i3 window data for maim
 
     # We want to be able to reboot and shutdown from Rofi
     if ! getent group sudo > /dev/null; then
@@ -630,7 +631,7 @@ if [[ "$fresh_install" == true || "$btop_update" == true ]]; then
     sudo tar xjvf "/opt/$btop_file" -C "/opt/"
     cd $btop_install_dir
     sudo bash "$btop_install_dir/install.sh"
-    cd $HOME
+    cd "$HOME"
     sudo rm "/opt/$btop_file"
 fi
 
@@ -1065,12 +1066,6 @@ if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     cd "$HOME"
 fi
 
-# Or maybe we need this for audio
-# Will it work with updated gtk?
-# This causes ghostty to take 15+ seconds to load
-# Looking at the output when running ghostty in the terminal, GTK errors show
-# sudo apt remove -y xdg-desktop-portal-gtk
-
 ######
 # Tmux
 ######
@@ -1176,7 +1171,7 @@ sudo apt autoclean -y
 ################
 
 # Rust is added last because it takes the longest (insert Rust comp times meme here)
-# If you do this in the middle of the install, the sudo "session" actually times out
+# If you do this in the middle of the install, the sudo "session" might time out
 
 # Rust URL
 # Check curl cmd as well
@@ -1213,7 +1208,7 @@ rustup_bin="$rust_bin_dir/rustup"
 cargo_bin="$rust_bin_dir/cargo"
 
 if [[ "$fresh_install" == true ]] ; then
-    #I don't know why but rust-analyzer doesn't work unless you do this
+    #I don't know why, but rust-analyzer doesn't work unless you do this
     "$rustup_bin" component add rust-analyzer
     "$cargo_bin" install --features lsp --locked taplo-cli
     "$cargo_bin" install stylua
