@@ -346,13 +346,13 @@ fi
 if [ "$fresh_install" == true ]; then
     git clone "$i3lock_repo" "$i3_color_git_dir"
 elif [ "$i3lock_update" == true ]; then
-    git checkout master
+    git checkout --force master
     git pull
 fi
 
 i3_color_build_dir="$i3_color_git_dir/build"
 if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
-    git checkout "$i3lock_tag" || { echo "Error: Cannot checkout $i3lock_tag"; exit 1; }
+    git checkout --force "$i3lock_tag" || { echo "Error: Cannot checkout $i3lock_tag"; exit 1; }
     ./install-i3lock-color.sh
     # for betterlockscreen
     mv "$i3_color_build_dir/i3lock" "$i3_color_build_dir/i3lock-color"
@@ -399,12 +399,12 @@ fi
 if [[ "$fresh_install" == true ]]; then
     git clone $magick_repo "$magick_git_dir"
 elif [[ "$magick_update" == true ]]; then
-    git checkout main
+    git checkout --force main
     git pull
 fi
 
 if [[ "$fresh_install" == true || "$magick_update" == true ]]; then
-    git checkout "$magick_tag" || { echo "Error: Cannot checkout $magick_tag"; exit 1; }
+    git checkout --force "$magick_tag" || { echo "Error: Cannot checkout $magick_tag"; exit 1; }
     ./configure
     make
     sudo make install
@@ -1047,12 +1047,12 @@ if [ "$fresh_install" = true ] ; then
 fi
 
 if [ "$ghostty_update" = true ] ; then
-    git checkout main
+    git checkout --force main
     git pull
 fi
 
 if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
-    git checkout "$ghostty_tag"
+    git checkout --force "$ghostty_tag"
     # This will send the built file to ~/.local/bin
     rm -rf "$HOME/.cache/zig"
     zig build -p "$HOME/.local" -Doptimize=ReleaseFast
@@ -1107,12 +1107,12 @@ fi
 cd "$tmux_git_dir" || { echo "Error: Cannot cd to $tmux_git_dir"; exit 1; }
 
 if [[ "$tmux_update" == true ]]; then
-    git checkout master
+    git checkout --force master
     git pull
 fi
 
 if [ "$fresh_install" = true ] || [ "$tmux_update" = true ]; then
-    git checkout "$tmux_branch" || { echo "Error: Cannot checkout $tmux_branch"; exit 1; }
+    git checkout --force "$tmux_branch" || { echo "Error: Cannot checkout $tmux_branch"; exit 1; }
     sh autogen.sh
     ./configure && make
 
@@ -1148,7 +1148,7 @@ fi
 # FUTURE: Can't the plugin manager just handle this?
 if [[ "$tmux_update" == true ]]; then
     cd "$power_dir" || { echo "Error: Cannot cd to $power_dir"; exit 1; }
-    git checkout master
+    git checkout --force master
     git pull
     cd "$HOME" || { echo "Error: Cannot cd to $HOME"; exit 1; }
 fi
