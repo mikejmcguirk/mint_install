@@ -374,7 +374,7 @@ fi
 # NOTE: Would changes to this affect betterlockscreen?
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.1-46"
+magick_tag="7.1.1-47"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" ]]; then
@@ -417,7 +417,7 @@ fi
 # betterlockscreen
 ##################
 
-# https://github.com/betterlockscreen/betterlockscreen
+# "https://github.com/betterlockscreen/betterlockscreen"
 # The URL is outlined for readability. If the install/update command needs changed, handle below
 bls_url="https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/main/install.sh"
 bls_tag="4.4.0"
@@ -643,7 +643,7 @@ fi
 ################
 
 # https://github.com/LuaLS/lua-language-server
-lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.13.9/lua-language-server-3.13.9-linux-x64.tar.gz"
+lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.14.0/lua-language-server-3.14.0-linux-x64.tar.gz"
 lua_ls_file=$(basename "$lua_ls_url")
 
 lua_ls_update=false
@@ -789,7 +789,7 @@ npm i -g "bash-language-server"@latest
 ##############
 
 # https://go.dev/doc/install
-go_dl_url="https://go.dev/dl/go1.24.1.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.24.2.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -851,7 +851,7 @@ go install github.com/nametake/golangci-lint-langserver@latest
 # NOTE: Because the full cmd relies on go env GOPATH, we cannot declare it here
 # Check the full curl|sh command on the website relative to what I have below
 go_lint_url="https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh"
-go_lint_dir="bin v1.64.7"
+go_lint_dir="bin v2.1.1"
 
 go_lint_update=false
 for arg in "$@"; do
