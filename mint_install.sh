@@ -48,6 +48,13 @@ fi
 #     export PATH=/usr/local/bin:$PATH
 # fi
 
+if [[ "$fresh_install" == true ]]; then
+    cat << EOF >> "$HOME/.bashrc"
+
+alias mint-install="bash \$HOME/mint_install/mint_install.sh"
+EOF
+fi
+
 ##################
 # System Hardening
 ##################
@@ -1207,7 +1214,7 @@ if [[ "$fresh_install" == true ]] ; then
     #I don't know why, but rust-analyzer doesn't work unless you do this
     "$rustup_bin" component add rust-analyzer
     "$cargo_bin" install --features lsp --locked taplo-cli
-    "$cargo_bin" install stylua --features luajit
+    "$cargo_bin" install --features luajit stylua
     "$cargo_bin" install tokei
     "$cargo_bin" install flamegraph
     "$cargo_bin" install --features 'pcre2' ripgrep # For Perl Compatible Regex
