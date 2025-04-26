@@ -696,7 +696,7 @@ fi
 ##########
 
 # https://obsidian.md/download
-obsidian_url="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.8.9/obsidian_1.8.9_amd64.deb"
+obsidian_url="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.8.10/obsidian_1.8.10_amd64.deb"
 obsidian_file=$(basename "$obsidian_url")
 
 obsidian_update=false
@@ -755,7 +755,7 @@ pipx upgrade-all
 
 # https://github.com/nvm-sh/nvm
 # Check that the install cmd is up to date as well
-nvm_install_url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.2/install.sh"
+nvm_install_url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh"
 nvm_update=false
 for arg in "$@"; do
     if [[ "$arg" == "nvm" ]]; then
@@ -858,7 +858,7 @@ go install github.com/nametake/golangci-lint-langserver@latest
 # NOTE: Because the full cmd relies on go env GOPATH, we cannot declare it here
 # Check the full curl|sh command on the website relative to what I have below
 go_lint_url="https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh"
-go_lint_dir="bin v2.1.1"
+go_lint_dir="bin v2.1.5"
 
 go_lint_update=false
 for arg in "$@"; do
