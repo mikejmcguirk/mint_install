@@ -61,7 +61,7 @@ fi
 
 if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y ufw
-    sudo apt remove -y gufw # Mint thing
+    # sudo apt remove -y gufw # Mint thing
 
     sudo ufw default deny incoming # Should be default, but let's be sure
     sudo ufw default allow outgoing # Also should be default
@@ -153,9 +153,9 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y qbittorrent
     sudo apt install -y kolourpaint
 
-    sudo apt remove -y drawing
-    sudo apt remove -y mintupdate
-    sudo apt remove -y timeshift
+    # sudo apt remove -y drawing
+    # sudo apt remove -y mintupdate
+    # sudo apt remove -y timeshift
 fi
 
 ##########
@@ -538,7 +538,7 @@ fi
 
 # https://github.com/neovim/neovim/releases
 # NOTE: Check the instructions as well as the tar URL in case they change
-nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.0/nvim-linux-x86_64.tar.gz"
+nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.1/nvim-linux-x86_64.tar.gz"
 nvim_tar=$(basename "$nvim_url")
 nvim_config_repo="https://github.com/mikejmcguirk/Neovim-Win10-Lazy"
 
