@@ -124,7 +124,7 @@ if [[ "$fresh_install" == true ]] ; then
     git config --global pull.rebase false
 
     # libsecret-1-0 already installed
-    sudo apt install libsecret-1-dev
+    sudo apt install -y libsecret-1-dev
     libsecret_path="/usr/share/doc/git/contrib/credential/libsecret"
     cd $libsecret_path
     sudo make
