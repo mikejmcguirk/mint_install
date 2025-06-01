@@ -538,7 +538,7 @@ fi
 
 # https://github.com/neovim/neovim/releases
 # NOTE: Check the instructions as well as the tar URL in case they change
-nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.1/nvim-linux-x86_64.tar.gz"
+nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.2/nvim-linux-x86_64.tar.gz"
 nvim_tar=$(basename "$nvim_url")
 nvim_config_repo="https://github.com/mikejmcguirk/Neovim-Win10-Lazy"
 
@@ -602,7 +602,7 @@ fi
 ######
 
 # https://github.com/aristocratos/btop
-btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.0/btop-x86_64-linux-musl.tbz"
+btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.3/btop-x86_64-linux-musl.tbz"
 btop_file=$(basename "$btop_url")
 
 btop_update=false
@@ -796,7 +796,7 @@ npm i -g "bash-language-server"@latest
 ##############
 
 # https://go.dev/doc/install
-go_dl_url="https://go.dev/dl/go1.24.2.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.24.3.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -858,7 +858,7 @@ go install github.com/nametake/golangci-lint-langserver@latest
 # NOTE: Because the full cmd relies on go env GOPATH, we cannot declare it here
 # Check the full curl|sh command on the website relative to what I have below
 go_lint_url="https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh"
-go_lint_dir="bin v2.1.5"
+go_lint_dir="bin v2.1.6"
 
 go_lint_update=false
 for arg in "$@"; do
@@ -940,7 +940,7 @@ fi
 ###############
 
 # https://www.nerdfonts.com/font-downloads
-nerd_font_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Cousine.zip"
+nerd_font_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Cousine.zip"
 nerd_font_filename=$(basename "$nerd_font_url")
 
 nerd_font_update=false
@@ -1033,7 +1033,7 @@ fi
 
 if [ "$fresh_install" = true ] || [ "$zig_update" = true ]; then
     sudo wget -P $ziglang_dir $zig_link
-    sudo tar -Jxf "$zig_filepath" -C /opt/ziglang
+    sudo tar -Jxf "$zig_filepath" -C "$ziglang_dir"
     sudo rm "$zig_filepath"
 fi
 
