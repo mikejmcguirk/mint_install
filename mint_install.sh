@@ -301,7 +301,7 @@ i3lock_tag="2.13.c.5"
 
 i3lock_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "i3lock" ]]; then
+    if [[ "$arg" == "i3lock" || "$arg" == "all" ]]; then
         i3lock_update=true
         echo "Updating i3lock-color..."
 
@@ -384,7 +384,7 @@ magick_repo="https://github.com/ImageMagick/ImageMagick"
 magick_tag="7.1.1-47"
 magick_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "magick" ]]; then
+    if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
         magick_update=true
         echo "Updating ImageMagick..."
 
@@ -430,7 +430,7 @@ bls_url="https://raw.githubusercontent.com/betterlockscreen/betterlockscreen/mai
 bls_tag="4.4.0"
 bls_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "bls" ]]; then
+    if [[ "$arg" == "bls" || "$arg" == "all" ]]; then
         bls_update=true
         echo "Updating betterlockscreen..."
 
@@ -468,7 +468,7 @@ fi
 spotify_key="https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg"
 spotify_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "spotify" ]]; then
+    if [[ "$arg" == "spotify" || "$arg" == "all" ]]; then
         spotify_update=true
         echo "Updating Spotify key..."
 
@@ -544,7 +544,7 @@ nvim_config_repo="https://github.com/mikejmcguirk/Neovim-Win10-Lazy"
 
 nvim_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "nvim" ]]; then
+    if [[ "$arg" == "nvim" || "$arg" == "all" ]]; then
         nvim_update=true
         echo "Updating Nvim..."
 
@@ -607,7 +607,7 @@ btop_file=$(basename "$btop_url")
 
 btop_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "btop" ]]; then
+    if [[ "$arg" == "btop" || "$arg" == "all" ]]; then
         btop_update=true
         echo "Updating Btop..."
 
@@ -655,7 +655,7 @@ lua_ls_file=$(basename "$lua_ls_url")
 
 lua_ls_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "lua_ls" ]]; then
+    if [[ "$arg" == "lua_ls" || "$arg" == "all" ]]; then
         lua_ls_update=true
         echo "Updating Lua LS..."
 
@@ -701,7 +701,7 @@ obsidian_file=$(basename "$obsidian_url")
 
 obsidian_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "obsidian" ]]; then
+    if [[ "$arg" == "obsidian" || "$arg" == "all" ]]; then
         obsidian_update=true
         echo "Updating Obsidian..."
 
@@ -758,7 +758,7 @@ pipx upgrade-all
 nvm_install_url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh"
 nvm_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "nvm" ]]; then
+    if [[ "$arg" == "nvm" || "$arg" == "all" ]]; then
         nvm_update=true
         echo "Updating Nvm..."
 
@@ -801,7 +801,7 @@ go_tar=$(basename "$go_dl_url")
 
 go_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "go" ]]; then
+    if [[ "$arg" == "go" || "$arg" == "all" ]]; then
         go_update=true
         echo "Updating Go..."
 
@@ -862,7 +862,7 @@ go_lint_dir="bin v2.1.6"
 
 go_lint_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "go_lint" ]]; then
+    if [[ "$arg" == "go_lint" || "$arg" == "all" ]]; then
         go_lint_update=true
         echo "Updating Go Lint..."
 
@@ -890,7 +890,7 @@ fi
 discord_url="https://discord.com/api/download?platform=linux&format=deb"
 discord_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "discord" ]]; then
+    if [[ "$arg" == "discord" || "$arg" == "all" ]]; then
         discord_update=true
         echo "Updating Discord..."
 
@@ -945,7 +945,7 @@ nerd_font_filename=$(basename "$nerd_font_url")
 
 nerd_font_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "nerd_font" ]]; then
+    if [[ "$arg" == "nerd_font" || "$arg" == "all" ]]; then
         nerd_font_update=true
         echo "Updating Nerd Font..."
 
@@ -987,7 +987,7 @@ zig_dir=$(basename "$zig_filepath" .tar.xz)
 
 ghostty_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "ghostty" ]]; then
+    if [[ "$arg" == "ghostty" || "$arg" == "all" ]]; then
         ghostty_update=true
         echo "Updating Ghostty..."
 
@@ -997,7 +997,7 @@ done
 
 zig_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "zig" ]]; then
+    if [[ "$arg" == "zig" || "$arg" == "all" ]]; then
         zig_update=true
         echo "Updating zig..."
 
@@ -1091,7 +1091,7 @@ fi
 
 tmux_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "tmux" ]]; then
+    if [[ "$arg" == "tmux" || "$arg" == "all" ]]; then
         if [[ "$fresh_install" == true ]]; then
             echo "Cannot do a fresh install and a tmux update at the same time"
             exit 1
@@ -1179,32 +1179,19 @@ sudo apt autoclean -y
 # Rust URL
 # Check curl cmd as well
 rustup_url="https://sh.rustup.rs"
-rustup_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "rustup" ]]; then
-        if [[ "$fresh_install" == true ]]; then
-            echo "Cannot do a fresh install and a rustup update at the same time"
-            exit 1
-        fi
-
-        rustup_update=true
-        echo "Updating rustup..."
-        break
-    fi
-done
-if [ "$fresh_install" = true ] && [ "$rustup_update" != true ]; then
+if [ "$fresh_install" = true ]; then
     echo "Installing rustup..."
-fi
 
-
-if [ "$fresh_install" = true ] || [ "$rustup_update" = true ]; then
     if  [ -z "$rustup_url" ] ; then
         echo "Error: rustup_url must be set"
         exit 1
     fi
 
     curl --proto '=https' --tlsv1.2 -sSf $rustup_url | sh
+else
+    rustup update
 fi
+
 
 rust_bin_dir="$HOME/.cargo/bin"
 rustup_bin="$rust_bin_dir/rustup"
