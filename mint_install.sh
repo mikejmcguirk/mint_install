@@ -61,7 +61,7 @@ fi
 
 if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y ufw
-    # sudo apt remove -y gufw # Mint thing
+    sudo apt remove -y gufw # Mint default
 
     sudo ufw default deny incoming # Should be default, but let's be sure
     sudo ufw default allow outgoing # Also should be default
@@ -153,9 +153,9 @@ if [[ "$fresh_install" == true ]] ; then
     sudo apt install -y qbittorrent
     sudo apt install -y kolourpaint
 
-    # sudo apt remove -y drawing
-    # sudo apt remove -y mintupdate
-    # sudo apt remove -y timeshift
+    sudo apt remove -y drawing
+    sudo apt remove -y mintupdate
+    sudo apt remove -y timeshift
 fi
 
 ##########
