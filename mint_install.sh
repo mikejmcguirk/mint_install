@@ -796,7 +796,7 @@ npm i -g "bash-language-server"@latest
 ##############
 
 # https://go.dev/doc/install
-go_dl_url="https://go.dev/dl/go1.24.3.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.24.4.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
