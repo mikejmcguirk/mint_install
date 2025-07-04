@@ -602,7 +602,7 @@ fi
 ######
 
 # https://github.com/aristocratos/btop
-btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.3/btop-x86_64-linux-musl.tbz"
+btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.4/btop-x86_64-linux-musl.tbz"
 btop_file=$(basename "$btop_url")
 
 btop_update=false
@@ -650,7 +650,7 @@ fi
 ################
 
 # https://github.com/LuaLS/lua-language-server
-lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.14.0/lua-language-server-3.14.0-linux-x64.tar.gz"
+lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.15.0/lua-language-server-3.15.0-linux-x64.tar.gz"
 lua_ls_file=$(basename "$lua_ls_url")
 
 lua_ls_update=false
@@ -858,7 +858,7 @@ go install github.com/nametake/golangci-lint-langserver@latest
 # NOTE: Because the full cmd relies on go env GOPATH, we cannot declare it here
 # Check the full curl|sh command on the website relative to what I have below
 go_lint_url="https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh"
-go_lint_dir="bin v2.1.6"
+go_lint_dir="bin v2.2.1"
 
 go_lint_update=false
 for arg in "$@"; do
@@ -1102,6 +1102,7 @@ for arg in "$@"; do
         break
     fi
 done
+
 if [ "$fresh_install" = true ] && [ "$tmux_update" != true ]; then
     echo "Installing tmux..."
 fi
