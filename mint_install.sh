@@ -473,6 +473,7 @@ fi
 # Spotify
 #########
 
+# TODO: Prefs file is incorrect
 # https://www.spotify.com/de-en/download/linux/
 # Check directions for updated key
 spotify_key="https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg"
@@ -857,7 +858,7 @@ npm i -g "bash-language-server"@latest
 ##############
 
 # https://go.dev/doc/install
-go_dl_url="https://go.dev/dl/go1.24.4.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.24.5.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -920,7 +921,7 @@ go install github.com/nametake/golangci-lint-langserver@latest
 # NOTE: Because the full cmd relies on go env GOPATH, we cannot declare it here
 # Check the full curl|sh command on the website relative to what I have below
 go_lint_url="https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh"
-go_lint_dir="bin v2.2.1"
+go_lint_dir="bin v2.2.2"
 
 go_lint_update=false
 for arg in "$@"; do
