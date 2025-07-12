@@ -93,7 +93,6 @@ sudo apt upgrade -y
 
 if [[ "$fresh_install" == true ]]; then
     sudo apt install -y fd-find
-    sudo apt install -y fzf
     sudo apt install -y vim
     sudo apt install -y sqlite3
     sudo apt install -y virtualbox
@@ -194,9 +193,9 @@ fi
 ##############
 
 dotfiles_url="https://github.com/mikejmcguirk/dotfiles"
-echo "Pulling in dotfiles"
 
 if [[ "$fresh_install" == true ]]; then
+    echo "Pulling in dotfiles"
     if [ -z "$dotfiles_url" ]; then
         echo "Error: dotfiles_url must be set."
         exit 1
@@ -535,6 +534,48 @@ if [[ "$fresh_install" == true ]]; then
     curl -fsS https://dl.brave.com/install.sh | sh
 fi
 sudo apt remove -y firefox
+
+#####
+# fzf
+#####
+
+fzf_repo="https://github.com/junegunn/fzf"
+fzf_tag="v0.64.0"
+fzf_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "fzf" || "$arg" == "all" ]]; then
+        fzf_update=true
+        echo "Updating fzf..."
+
+        break
+    fi
+done
+
+fzf_git_dir="$HOME/.local/bin/fzf"
+if [[ "$fresh_install" == true || "$fzf_update" == true ]]; then
+    [ ! -d "$fzf_git_dir" ] && mkdir -p "$fzf_git_dir"
+    cd "$fzf_git_dir" || {
+        echo "Error: Cannot cd to $fzf_git_dir"
+        exit 1
+    }
+fi
+
+if [[ "$fresh_install" == true ]]; then
+    git clone $fzf_repo "$fzf_git_dir"
+elif [[ "$fzf_update" == true ]]; then
+    git checkout --force master
+    git pull
+fi
+
+if [[ "$fresh_install" == true || "$fzf_update" == true ]]; then
+    git checkout --force "$fzf_tag" || {
+        echo "Error: Cannot checkout $fzf_tag"
+        exit 1
+    }
+
+    bash install --key-bindings --completion --update-rc
+    cd "$HOME"
+fi
 
 ########
 # Neovim
