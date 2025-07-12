@@ -49,7 +49,7 @@ fi
 # fi
 
 if [[ "$fresh_install" == true ]]; then
-    cat << EOF >> "$HOME/.bashrc"
+    cat <<EOF >>"$HOME/.bashrc"
 
 alias mint-install="bash \$HOME/mint_install/mint_install.sh"
 EOF
@@ -59,11 +59,11 @@ fi
 # System Hardening
 ##################
 
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     sudo apt install -y ufw
     sudo apt remove -y gufw # Mint default
 
-    sudo ufw default deny incoming # Should be default, but let's be sure
+    sudo ufw default deny incoming  # Should be default, but let's be sure
     sudo ufw default allow outgoing # Also should be default
     sudo ufw logging on
     sudo ufw --force enable
@@ -72,7 +72,7 @@ if [[ "$fresh_install" == true ]] ; then
     [ ! -d "$ssh_dir" ] && mkdir -p "$ssh_dir"
     chmod 700 "$ssh_dir"
 
-    cat << 'EOF' > "$ssh_dir/config"
+    cat <<'EOF' >"$ssh_dir/config"
 Host *
 ServerAliveInterval 60
 ServerAliveCountMax 30
@@ -91,7 +91,7 @@ sudo apt upgrade -y
 # Utilities
 ###########
 
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     sudo apt install -y fd-find
     sudo apt install -y fzf
     sudo apt install -y vim
@@ -106,7 +106,7 @@ fi
 # Dev Tools
 ###########
 
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     sudo apt install -y shellcheck
     sudo apt install -y llvm
 fi
@@ -115,7 +115,7 @@ fi
 # Git
 #####
 
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     sudo apt install -y git-all
 
     git config --global user.name "Mike J. McGuirk"
@@ -136,7 +136,7 @@ fi
 # Wireguard
 ###########
 
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     sudo apt install -y wireguard
     # resolvconf is a service in Mint Xia
     sudo apt install -y natpmpc
@@ -146,7 +146,7 @@ fi
 # General Programs
 ##################
 
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     sudo apt install -y vlc
     sudo apt install -y hexchat
     sudo apt install -y libreoffice
@@ -162,7 +162,7 @@ fi
 # Redshift
 ##########
 
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     sudo apt install -y redshift-gtk
     sudo systemctl disable geoclue
 
@@ -171,7 +171,7 @@ if [[ "$fresh_install" == true ]] ; then
 
     # lat and lon are set for zero to avoid dox
     echo "Writing Redshift configuration to $redshift_conf_file..."
-    if cat << 'EOF' > "$redshift_conf_file"
+    if cat <<'EOF' >"$redshift_conf_file"; then
 [redshift]
 temp-day=6500
 temp-night=4000
@@ -182,7 +182,6 @@ location-provider=manual
 lat=00.0000
 lon=00.0000
 EOF
-    then
         echo "Successfully wrote to $redshift_conf_file"
     else
         echo "Error: Failed to write to $redshift_conf_file"
@@ -197,8 +196,8 @@ fi
 dotfiles_url="https://github.com/mikejmcguirk/dotfiles"
 echo "Pulling in dotfiles"
 
-if [[ "$fresh_install" == true ]] ; then
-    if [ -z "$dotfiles_url" ] ; then
+if [[ "$fresh_install" == true ]]; then
+    if [ -z "$dotfiles_url" ]; then
         echo "Error: dotfiles_url must be set."
         exit 1
     fi
@@ -209,7 +208,7 @@ if [[ "$fresh_install" == true ]] ; then
     git --git-dir="$dotfile_dir" --work-tree="$HOME" checkout main --force
 
     if ! grep -q ".bashrc_custom" "$HOME/.bashrc"; then
-        cat << 'EOF' >> "$HOME/.bashrc"
+        cat <<'EOF' >>"$HOME/.bashrc"
 
 if [ -f "$HOME/.bashrc_custom" ]; then
     . "$HOME/.bashrc_custom"
@@ -226,7 +225,7 @@ fi
 # Window Manager
 ################
 
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     sudo apt install -y i3
     sudo apt install -y xautolock
     sudo apt install -y playerctl # Detect playing media to avoid screen lock
@@ -245,14 +244,14 @@ fi
 # rofi
 ######
 
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     sudo apt install -y rofi
-    sudo apt install -y maim # Use rofi as a wrapper for screenshots
+    sudo apt install -y maim  # Use rofi as a wrapper for screenshots
     sudo apt install -y xclip # For copying screenshots to clipboard
-    sudo apt install -y jq # To parse i3 window data for maim
+    sudo apt install -y jq    # To parse i3 window data for maim
 
     # We want to be able to reboot and shutdown from Rofi
-    if ! getent group sudo > /dev/null; then
+    if ! getent group sudo >/dev/null; then
         echo "Error: The 'sudo' group does not exist on this system"
         echo "Please create the group or modify the script to use a different group/username"
         exit 1
@@ -264,7 +263,7 @@ if [[ "$fresh_install" == true ]] ; then
         exit 1
     fi
 
-    if ! echo "%sudo ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" | sudo tee "$reboot_shutdown_file" > /dev/null; then
+    if ! echo "%sudo ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" | sudo tee "$reboot_shutdown_file" >/dev/null; then
         echo "Failed to write to $reboot_shutdown_file"
         sudo rm -f "$reboot_shutdown_file"
         exit 1
@@ -282,7 +281,7 @@ if [[ "$fresh_install" == true ]] ; then
         exit 1
     fi
 
-    cat << EOF >> "$HOME/.bashrc"
+    cat <<EOF >>"$HOME/.bashrc"
 
 export PATH="\$PATH:/sbin"
 EOF
@@ -347,7 +346,10 @@ fi
 i3_color_git_dir="$HOME/.local/bin/i3lock-color"
 if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
     [ ! -d "$i3_color_git_dir" ] && mkdir -p "$i3_color_git_dir"
-    cd "$i3_color_git_dir" || { echo "Error: Cannot cd to $i3_color_git_dir"; exit 1; }
+    cd "$i3_color_git_dir" || {
+        echo "Error: Cannot cd to $i3_color_git_dir"
+        exit 1
+    }
 fi
 
 if [ "$fresh_install" == true ]; then
@@ -359,7 +361,10 @@ fi
 
 i3_color_build_dir="$i3_color_git_dir/build"
 if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
-    git checkout --force "$i3lock_tag" || { echo "Error: Cannot checkout $i3lock_tag"; exit 1; }
+    git checkout --force "$i3lock_tag" || {
+        echo "Error: Cannot checkout $i3lock_tag"
+        exit 1
+    }
     ./install-i3lock-color.sh
     # for betterlockscreen
     mv "$i3_color_build_dir/i3lock" "$i3_color_build_dir/i3lock-color"
@@ -367,8 +372,8 @@ if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
     cd "$HOME"
 fi
 
-if [[ "$fresh_install" == true ]] ; then
-    cat << EOF >> "$HOME/.bashrc"
+if [[ "$fresh_install" == true ]]; then
+    cat <<EOF >>"$HOME/.bashrc"
 
 export PATH="\$PATH:$i3_color_build_dir"
 EOF
@@ -400,7 +405,10 @@ fi
 magick_git_dir="$HOME/.local/bin/magick"
 if [[ "$fresh_install" == true || "$magick_update" == true ]]; then
     [ ! -d "$magick_git_dir" ] && mkdir -p "$magick_git_dir"
-    cd "$magick_git_dir" || { echo "Error: Cannot cd to $magick_git_dir"; exit 1; }
+    cd "$magick_git_dir" || {
+        echo "Error: Cannot cd to $magick_git_dir"
+        exit 1
+    }
 fi
 
 if [[ "$fresh_install" == true ]]; then
@@ -411,7 +419,10 @@ elif [[ "$magick_update" == true ]]; then
 fi
 
 if [[ "$fresh_install" == true || "$magick_update" == true ]]; then
-    git checkout --force "$magick_tag" || { echo "Error: Cannot checkout $magick_tag"; exit 1; }
+    git checkout --force "$magick_tag" || {
+        echo "Error: Cannot checkout $magick_tag"
+        exit 1
+    }
     ./configure
     make
     sudo make install
@@ -502,7 +513,7 @@ if [[ "$fresh_install" == true || "$spotify_update" == true ]]; then
             echo "The line '$spotify_ui_setting' already exists in $prefs_file. Skipping..."
         else
             echo "Appending '$spotify_ui_setting' to $prefs_file..."
-            echo "$spotify_ui_setting" >> "$prefs_file"
+            echo "$spotify_ui_setting" >>"$prefs_file"
         fi
     else
         echo "Creating $prefs_file and adding the configuration line..."
@@ -510,7 +521,7 @@ if [[ "$fresh_install" == true || "$spotify_update" == true ]]; then
             echo "Error: Failed to create $prefs_file. Check permissions."
             exit 1
         fi
-        echo "$spotify_ui_setting" > "$prefs_file"
+        echo "$spotify_ui_setting" >"$prefs_file"
     fi
 
     echo "Spotify preferences updated successfully."
@@ -560,7 +571,7 @@ if [[ "$fresh_install" == true ]]; then
 fi
 
 if [[ "$fresh_install" == true || "$nvim_update" == true ]]; then
-    if [ -z "$nvim_url" ] || [ -z "$nvim_tar" ] ; then
+    if [ -z "$nvim_url" ] || [ -z "$nvim_tar" ]; then
         echo "Error: nvim_url and nvim_tar must be set"
         exit 1
     fi
@@ -581,7 +592,7 @@ if [[ "$fresh_install" == true || "$nvim_update" == true ]]; then
 fi
 
 if [[ "$fresh_install" == true ]]; then
-    if [ -z "$nvim_config_repo" ] ; then
+    if [ -z "$nvim_config_repo" ]; then
         echo "No Nvim config repo to clone. Exiting..."
         exit 1
     fi
@@ -591,7 +602,7 @@ if [[ "$fresh_install" == true ]]; then
 
     git clone $nvim_config_repo "$nvim_conf_dir"
 
-    cat << EOF >> "$HOME/.bashrc"
+    cat <<EOF >>"$HOME/.bashrc"
 
 export PATH="\$PATH:$nvim_install_dir/bin"
 EOF
@@ -618,7 +629,7 @@ done
 btop_install_dir="/opt/btop"
 
 if [[ "$fresh_install" == true || "$btop_update" == true ]]; then
-    if [ -z "$btop_url" ] || [ -z "$btop_file" ] ; then
+    if [ -z "$btop_url" ] || [ -z "$btop_file" ]; then
         echo "Error: btop_url and btop_file must be set"
         exit 1
     fi
@@ -639,7 +650,7 @@ if [[ "$fresh_install" == true || "$btop_update" == true ]]; then
 fi
 
 if [[ "$fresh_install" == true ]]; then
-    cat << EOF >> "$HOME/.bashrc"
+    cat <<EOF >>"$HOME/.bashrc"
 
 export PATH="\$PATH:$btop_install_dir/bin"
 EOF
@@ -666,7 +677,7 @@ done
 lua_ls_install_dir="$HOME/.local/bin/lua_ls"
 
 if [[ "$fresh_install" == true || "$lua_ls_update" == true ]]; then
-    if [ -z "$lua_ls_url" ] || [ -z "$lua_ls_file" ] ; then
+    if [ -z "$lua_ls_url" ] || [ -z "$lua_ls_file" ]; then
         echo "Error: lua_ls_url and lua_ls_file must be set"
         exit 1
     fi
@@ -685,7 +696,7 @@ if [[ "$fresh_install" == true || "$lua_ls_update" == true ]]; then
 fi
 
 if [[ "$fresh_install" == true ]]; then
-    cat << EOF >> "$HOME/.bashrc"
+    cat <<EOF >>"$HOME/.bashrc"
 
 export PATH="\$PATH:$lua_ls_install_dir/bin"
 EOF
@@ -714,14 +725,23 @@ if [[ "$fresh_install" == true && "$obsidian_update" != true ]]; then
 fi
 
 if [[ "$fresh_install" == true || "$obsidian_update" == true ]]; then
-    if [ -z "$obsidian_url" ] || [ -z "$obsidian_file" ] ; then
+    if [ -z "$obsidian_url" ] || [ -z "$obsidian_file" ]; then
         echo "Error: obsidian_url and obsidian_file must be set"
         exit 1
     fi
 
-    curl -LO --output-dir "$HOME/.local" "$obsidian_url" || { echo "Obsidian curl failed"; exit 1; }
-    sudo apt install -y "$HOME/.local/$obsidian_file" || { echo "Unable to install Obsidian Deb file"; exit 1; }
-    rm "$HOME/.local/$obsidian_file" || { echo "Unable to delete Obsidian Deb file"; exit 1; }
+    curl -LO --output-dir "$HOME/.local" "$obsidian_url" || {
+        echo "Obsidian curl failed"
+        exit 1
+    }
+    sudo apt install -y "$HOME/.local/$obsidian_file" || {
+        echo "Unable to install Obsidian Deb file"
+        exit 1
+    }
+    rm "$HOME/.local/$obsidian_file" || {
+        echo "Unable to delete Obsidian Deb file"
+        exit 1
+    }
 fi
 
 ##################
@@ -735,13 +755,13 @@ if [[ "$fresh_install" == true ]]; then
 
     pipx ensurepath # Adds ~/.local/bin to path
     # Add pipx completions
-    cat << 'EOF' >> "$HOME/.bashrc"
+    cat <<'EOF' >>"$HOME/.bashrc"
 
 eval "$(register-python-argcomplete pipx)"
 EOF
 
     pipx install nvitop
-    pipx install beautysh
+    # pipx install beautysh
     pipx runpip beautysh install setuptools
     pipx install ruff
     pipx install python-lsp-server[all]
@@ -767,7 +787,7 @@ for arg in "$@"; do
 done
 
 if [[ "$fresh_install" == true || "$nvm_update" == true ]]; then
-    if [ -z "$nvm_install_url" ] ; then
+    if [ -z "$nvm_install_url" ]; then
         echo "nvim_install_url must be set"
         exit 1
     fi
@@ -841,7 +861,7 @@ export PATH=$PATH:$GOPATH/bin
 
 if [[ "$fresh_install" == true ]]; then
     echo "Adding Go paths to $HOME/.bashrc..."
-    cat << EOF >> "$HOME/.bashrc"
+    cat <<EOF >>"$HOME/.bashrc"
 
 # Go environment setup
 export PATH=\$PATH:$go_install_bin
@@ -851,6 +871,7 @@ EOF
 fi
 
 go install mvdan.cc/gofumpt@latest
+go install mvdan.cc/sh/v3/cmd/shfmt@latest
 go install golang.org/x/tools/gopls@latest
 go install github.com/nametake/golangci-lint-langserver@latest
 
@@ -903,7 +924,7 @@ if [ "$fresh_install" = true ] && [ "$discord_update" != true ]; then
 fi
 
 if [[ "$fresh_install" == true || "$discord_update" == true ]]; then
-    if [ -z "$discord_url" ] ; then
+    if [ -z "$discord_url" ]; then
         echo "Error: discord_url must be set."
         exit 1
     fi
@@ -961,7 +982,7 @@ if [[ "$fresh_install" == true || "$nerd_font_update" == true ]]; then
     fonts_dir="$HOME/.fonts"
     [ ! -d "$fonts_dir" ] && mkdir -p "$fonts_dir"
 
-    if [ -z "$nerd_font_url" ] ; then
+    if [ -z "$nerd_font_url" ]; then
         echo "Error: nerd_font_url must be set."
         exit 1
     fi
@@ -1005,7 +1026,7 @@ for arg in "$@"; do
     fi
 done
 
-if [ "$fresh_install" = true ] ; then
+if [ "$fresh_install" = true ]; then
     echo "Installing Ghostty..."
     echo "Installing zig..."
 
@@ -1046,14 +1067,17 @@ if [ "$fresh_install" = true ] || [ "$zig_update" = true ] || [ "$ghostty_update
 fi
 
 if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
-    cd "$ghostty_dir" || { echo "Error: Cannot cd to $ghostty_dir"; exit 1; }
+    cd "$ghostty_dir" || {
+        echo "Error: Cannot cd to $ghostty_dir"
+        exit 1
+    }
 fi
 
-if [ "$fresh_install" = true ] ; then
+if [ "$fresh_install" = true ]; then
     git clone $ghostty_repo .
 fi
 
-if [ "$ghostty_update" = true ] ; then
+if [ "$ghostty_update" = true ]; then
     git checkout --force main
     git pull
 fi
@@ -1084,7 +1108,7 @@ tmux_branch="tmux-3.5a"
 tpm_repo="https://github.com/tmux-plugins/tpm"
 tmux_power_repo="https://github.com/wfxr/tmux-power"
 
-if [ -z "$tmux_url" ] || [ -z "$tmux_branch" ] ; then
+if [ -z "$tmux_url" ] || [ -z "$tmux_branch" ]; then
     echo "Error: tmux_url and tmux_branch must be set"
     exit 1
 fi
@@ -1114,7 +1138,10 @@ if [[ "$fresh_install" == true ]]; then
     git clone $tmux_url "$tmux_git_dir"
 fi
 
-cd "$tmux_git_dir" || { echo "Error: Cannot cd to $tmux_git_dir"; exit 1; }
+cd "$tmux_git_dir" || {
+    echo "Error: Cannot cd to $tmux_git_dir"
+    exit 1
+}
 
 if [[ "$tmux_update" == true ]]; then
     git checkout --force master
@@ -1122,17 +1149,23 @@ if [[ "$tmux_update" == true ]]; then
 fi
 
 if [ "$fresh_install" = true ] || [ "$tmux_update" = true ]; then
-    git checkout --force "$tmux_branch" || { echo "Error: Cannot checkout $tmux_branch"; exit 1; }
+    git checkout --force "$tmux_branch" || {
+        echo "Error: Cannot checkout $tmux_branch"
+        exit 1
+    }
     sh autogen.sh
     ./configure && make
 
     echo "tmux build complete"
 fi
 
-cd "$HOME" || { echo "Error: Cannot cd to $HOME"; exit 1; }
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
 
 if [[ "$fresh_install" == true ]]; then
-    cat << EOF >> "$HOME/.bashrc"
+    cat <<EOF >>"$HOME/.bashrc"
 
 export PATH="\$PATH:$tmux_git_dir"
 EOF
@@ -1144,7 +1177,7 @@ tpm_dir="$tmux_plugins_dir/tpm"
 power_dir="$tmux_plugins_dir/tmux-power"
 
 if [ "$fresh_install" = true ] || [ "$tmux_update" = true ]; then
-    if  [ -z "$tpm_repo" ] || [ -z $tmux_power_repo ]; then
+    if [ -z "$tpm_repo" ] || [ -z $tmux_power_repo ]; then
         echo "Error: tpm_repo and tmux_power_repo must be set"
         exit 1
     fi
@@ -1157,10 +1190,16 @@ fi
 
 # FUTURE: Can't the plugin manager just handle this?
 if [[ "$tmux_update" == true ]]; then
-    cd "$power_dir" || { echo "Error: Cannot cd to $power_dir"; exit 1; }
+    cd "$power_dir" || {
+        echo "Error: Cannot cd to $power_dir"
+        exit 1
+    }
     git checkout --force master
     git pull
-    cd "$HOME" || { echo "Error: Cannot cd to $HOME"; exit 1; }
+    cd "$HOME" || {
+        echo "Error: Cannot cd to $HOME"
+        exit 1
+    }
 fi
 
 #############
@@ -1183,7 +1222,7 @@ rustup_url="https://sh.rustup.rs"
 if [ "$fresh_install" = true ]; then
     echo "Installing rustup..."
 
-    if  [ -z "$rustup_url" ] ; then
+    if [ -z "$rustup_url" ]; then
         echo "Error: rustup_url must be set"
         exit 1
     fi
@@ -1193,12 +1232,11 @@ else
     rustup update
 fi
 
-
 rust_bin_dir="$HOME/.cargo/bin"
 rustup_bin="$rust_bin_dir/rustup"
 cargo_bin="$rust_bin_dir/cargo"
 
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     #I don't know why, but rust-analyzer doesn't work unless you do this
     "$rustup_bin" component add rust-analyzer
     "$cargo_bin" install --features lsp --locked taplo-cli
@@ -1221,7 +1259,7 @@ fi
 # sudo update-initramfs -u
 
 what_happened="Update"
-if [[ "$fresh_install" == true ]] ; then
+if [[ "$fresh_install" == true ]]; then
     what_happened="Install"
 fi
 echo "$what_happened script complete"
