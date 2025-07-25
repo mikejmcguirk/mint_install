@@ -385,7 +385,7 @@ fi
 # NOTE: Would changes to this affect betterlockscreen?
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.1-47"
+magick_tag="7.1.2-0"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
@@ -533,8 +533,8 @@ fi
 
 if [[ "$fresh_install" == true ]]; then
     curl -fsS https://dl.brave.com/install.sh | sh
+    sudo apt remove -y firefox
 fi
-sudo apt remove -y firefox
 
 #####
 # fzf
@@ -592,6 +592,7 @@ fi
 # https://github.com/neovim/neovim/releases
 # NOTE: Check the instructions as well as the tar URL in case they change
 nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.2/nvim-linux-x86_64.tar.gz"
+# nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.3/nvim-linux-x86_64.tar.gz"
 nvim_tar=$(basename "$nvim_url")
 nvim_config_repo="https://github.com/mikejmcguirk/Neovim-Win10-Lazy"
 
@@ -921,7 +922,7 @@ go install github.com/nametake/golangci-lint-langserver@latest
 # NOTE: Because the full cmd relies on go env GOPATH, we cannot declare it here
 # Check the full curl|sh command on the website relative to what I have below
 go_lint_url="https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh"
-go_lint_dir="bin v2.2.2"
+go_lint_dir="bin v2.3.0"
 
 go_lint_update=false
 for arg in "$@"; do
