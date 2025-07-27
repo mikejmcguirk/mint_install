@@ -574,7 +574,7 @@ if [[ "$fresh_install" == true || "$fzf_update" == true ]]; then
         exit 1
     }
 
-    bash install --key-bindings --completion --update-rc
+    bash install --key-bindings --completion
     cd "$HOME"
 fi
 
