@@ -591,7 +591,8 @@ fi
 
 # https://github.com/neovim/neovim/releases
 # NOTE: Check the instructions as well as the tar URL in case they change
-nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.2/nvim-linux-x86_64.tar.gz"
+# nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.2/nvim-linux-x86_64.tar.gz"
+nvim_url="https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz"
 # nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.3/nvim-linux-x86_64.tar.gz"
 nvim_tar=$(basename "$nvim_url")
 nvim_config_repo="https://github.com/mikejmcguirk/Neovim-Win10-Lazy"
@@ -1286,6 +1287,7 @@ if [[ "$fresh_install" == true ]]; then
     "$cargo_bin" install --features luajit stylua
     "$cargo_bin" install tokei
     "$cargo_bin" install flamegraph
+    "$cargo_bin" install --locked tree-sitter-cli
     "$cargo_bin" install --features 'pcre2' ripgrep # For Perl Compatible Regex
     sudo apt install -y libssl-dev
     "$cargo_bin" install cargo-update
