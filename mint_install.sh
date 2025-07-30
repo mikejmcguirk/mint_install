@@ -578,6 +578,41 @@ if [[ "$fresh_install" == true || "$fzf_update" == true ]]; then
     cd "$HOME"
 fi
 
+#######
+# words
+#######
+
+words_repo="https://github.com/dwyl/english-words"
+words_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "words" || "$arg" == "all" ]]; then
+        words_update=true
+        echo "Updating words..."
+
+        break
+    fi
+done
+
+if [[ "$fresh_install" == true ]]; then
+    sudo apt install wordnet
+fi
+
+words_git_dir="$HOME/.local/bin/words"
+if [[ "$fresh_install" == true || "$words_update" == true ]]; then
+    [ ! -d "$words_git_dir" ] && mkdir -p "$words_git_dir"
+    cd "$words_git_dir" || {
+        echo "Error: Cannot cd to $words_git_dir"
+        exit 1
+    }
+fi
+
+if [[ "$fresh_install" == true ]]; then
+    git clone $words_repo "$words_git_dir"
+elif [[ "$words_update" == true ]]; then
+    git checkout --force master
+    git pull
+fi
+
 ########
 # Neovim
 ########
