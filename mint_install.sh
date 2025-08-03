@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO: See about using star tags. Maybe get the current tag in here, then the star tag, and see
+# if an update is needed
+
 set -e # quit on error
 cp "$HOME/.bashrc" "$HOME/.bashrc.bak"
 
@@ -149,6 +152,7 @@ if [[ "$fresh_install" == true ]]; then
     sudo apt install -y vlc
     sudo apt install -y hexchat
     sudo apt install -y libreoffice
+    sudo apt install -y wordnet
     sudo apt install -y qbittorrent
     sudo apt install -y kolourpaint
 
