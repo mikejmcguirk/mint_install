@@ -1316,9 +1316,9 @@ else
     rustup update
 fi
 
+rust_bin_dir="$HOME/.cargo/bin"
 cargo_bin="$rust_bin_dir/cargo"
 if [[ "$fresh_install" == true ]]; then
-    rust_bin_dir="$HOME/.cargo/bin"
     rustup_bin="$rust_bin_dir/rustup"
 
     "$rustup_bin" toolchain install nightly
