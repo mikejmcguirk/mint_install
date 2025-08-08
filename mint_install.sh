@@ -545,7 +545,7 @@ fi
 #####
 
 fzf_repo="https://github.com/junegunn/fzf"
-fzf_tag="v0.64.0"
+fzf_tag="v0.65.1"
 fzf_update=false
 for arg in "$@"; do
     if [[ "$arg" == "fzf" || "$arg" == "all" ]]; then
@@ -899,7 +899,7 @@ npm i -g "bash-language-server"@latest
 ##############
 
 # https://go.dev/doc/install
-go_dl_url="https://go.dev/dl/go1.24.5.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.24.6.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -962,7 +962,7 @@ go install github.com/nametake/golangci-lint-langserver@latest
 # NOTE: Because the full cmd relies on go env GOPATH, we cannot declare it here
 # Check the full curl|sh command on the website relative to what I have below
 go_lint_url="https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh"
-go_lint_dir="bin v2.3.0"
+go_lint_dir="bin v2.3.1"
 
 go_lint_update=false
 for arg in "$@"; do
@@ -1044,6 +1044,7 @@ fi
 ###############
 
 # https://www.nerdfonts.com/font-downloads
+# Cousine version: 1.211
 nerd_font_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Cousine.zip"
 nerd_font_filename=$(basename "$nerd_font_url")
 
