@@ -389,7 +389,7 @@ fi
 # NOTE: Would changes to this affect betterlockscreen?
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.2-0"
+magick_tag="7.1.2-1"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
@@ -790,7 +790,7 @@ fi
 ##########
 
 # https://obsidian.md/download
-obsidian_url="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.8.10/obsidian_1.8.10_amd64.deb"
+obsidian_url="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.9.10/obsidian_1.9.10_amd64.deb"
 obsidian_file=$(basename "$obsidian_url")
 
 obsidian_update=false
@@ -899,7 +899,7 @@ npm i -g "bash-language-server"@latest
 ##############
 
 # https://go.dev/doc/install
-go_dl_url="https://go.dev/dl/go1.24.6.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.25.0.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
