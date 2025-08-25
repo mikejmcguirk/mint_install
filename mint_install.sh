@@ -957,35 +957,7 @@ go install mvdan.cc/gofumpt@latest
 go install mvdan.cc/sh/v3/cmd/shfmt@latest
 go install golang.org/x/tools/gopls@latest
 go install github.com/nametake/golangci-lint-langserver@latest
-
-# https://golangci-lint.run/welcome/install/#local-installation
-# NOTE: Because the full cmd relies on go env GOPATH, we cannot declare it here
-# Check the full curl|sh command on the website relative to what I have below
-go_lint_url="https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh"
-go_lint_dir="bin v2.3.1"
-
-go_lint_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "go_lint" || "$arg" == "all" ]]; then
-        go_lint_update=true
-        echo "Updating Go Lint..."
-
-        break
-    fi
-done
-
-if [ "$fresh_install" = true ] && [ "$go_lint_update" != true ]; then
-    echo "Installing Go Lint..."
-fi
-
-if [ "$fresh_install" = true ] || [ "$go_lint_update" = true ]; then
-    if [ -z "$go_lint_url" ] || [ -z "$go_lint_dir" ]; then
-        echo "go_lint_url and go_lint_dir must be set"
-        exit 1
-    else
-        curl -sSfL "$go_lint_url" | sh -s -- -b "$(go env GOPATH)/$go_lint_dir"
-    fi
-fi
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 #########
 # Discord
