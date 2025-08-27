@@ -250,6 +250,7 @@ fi
 if [[ "$fresh_install" == true ]]; then
     sudo apt install -y rofi
     sudo apt install -y maim  # Use rofi as a wrapper for screenshots
+    sudo apt install -y xsel  # Preferred by Neovim
     sudo apt install -y xclip # For copying screenshots to clipboard
     sudo apt install -y jq    # To parse i3 window data for maim
 
