@@ -390,7 +390,7 @@ fi
 # NOTE: Would changes to this affect betterlockscreen?
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.2-1"
+magick_tag="7.1.2-3"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
@@ -791,7 +791,7 @@ fi
 ##########
 
 # https://obsidian.md/download
-obsidian_url="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.9.10/obsidian_1.9.10_amd64.deb"
+obsidian_url="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.9.12/obsidian_1.9.12_amd64.deb"
 obsidian_file=$(basename "$obsidian_url")
 
 obsidian_update=false
