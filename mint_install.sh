@@ -622,6 +622,9 @@ fi
 # Neovim
 ########
 
+nvim_repo="https://github.com/neovim/neovim"
+nvim_tag="master"
+
 # Dumb hack
 sudo apt remove -y neovim
 bad_neovim_dir="$HOME/.config/neovim"
@@ -629,68 +632,67 @@ if [ -d "$bad_neovim_dir" ]; then
     rm -rf "$bad_neovim_dir"
 fi
 
-# https://github.com/neovim/neovim/releases
-# NOTE: Check the instructions as well as the tar URL in case they change
-# nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.2/nvim-linux-x86_64.tar.gz"
-nvim_url="https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz"
-# nvim_url="https://github.com/neovim/neovim/releases/download/v0.11.3/nvim-linux-x86_64.tar.gz"
-nvim_tar=$(basename "$nvim_url")
-nvim_config_repo="https://github.com/mikejmcguirk/Neovim-Win10-Lazy"
+if [[ "$fresh_install" == true ]]; then
+    sudo apt install ninja-build gettext cmake curl build-essential git
+fi
+
+if [ -z "$nvim_repo" ] || [ -z "$nvim_tag" ]; then
+    echo "Error: nvim_url and nvim_tag must be set"
+    exit 1
+fi
 
 nvim_update=false
 for arg in "$@"; do
     if [[ "$arg" == "nvim" || "$arg" == "all" ]]; then
-        nvim_update=true
-        echo "Updating Nvim..."
+        if [[ "$fresh_install" == true ]]; then
+            echo "Cannot do a fresh install and a nvim update at the same time"
+            exit 1
+        fi
 
+        nvim_update=true
+        echo "Updating nvim..."
         break
     fi
 done
 
-nvim_root_dir="/opt"
-nvim_install_dir="$nvim_root_dir/nvim-linux-x86_64"
+if [ "$fresh_install" = true ] && [ "$nvim_update" != true ]; then
+    echo "Installing nvim..."
+fi
+
+nvim_git_dir="$HOME/.local/bin/neovim"
+[ ! -d "$nvim_git_dir" ] && mkdir -p "$nvim_git_dir"
 
 if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y xclip # For copy/paste
+    git clone $nvim_repo "$nvim_git_dir"
 fi
 
-if [[ "$fresh_install" == true || "$nvim_update" == true ]]; then
-    if [ -z "$nvim_url" ] || [ -z "$nvim_tar" ]; then
-        echo "Error: nvim_url and nvim_tar must be set"
+cd "$nvim_git_dir" || {
+    echo "Error: Cannot cd to $nvim_git_dir"
+    exit 1
+}
+
+if [[ "$nvim_update" == true ]]; then
+    git checkout --force master
+    git pull
+fi
+
+if [ "$fresh_install" = true ] || [ "$nvim_update" = true ]; then
+    git checkout --force "$nvim_tag" || {
+        echo "Error: Cannot checkout $nvim_tag"
         exit 1
-    fi
+    }
 
-    if [ -d "$nvim_install_dir" ]; then
-        echo "Removing existing Nvim installation at $nvim_install_dir..."
-        sudo rm -rf $nvim_install_dir
-    else
-        echo "No existing Nvim installation found at $nvim_install_dir"
-    fi
+    # rm -rf .deps build
+    make CMAKE_BUILD_TYPE=Release
+    sudo make install
 
-    nvim_tar_dir="$HOME/.local"
-    [ ! -d "$nvim_tar_dir" ] && mkdir -p "$nvim_tar_dir"
-
-    curl -LO --output-dir "$nvim_tar_dir" "$nvim_url"
-    sudo tar -C $nvim_root_dir -xzf "$nvim_tar_dir/$nvim_tar"
-    rm "$nvim_tar_dir/$nvim_tar"
+    echo "nvim build complete"
 fi
 
-if [[ "$fresh_install" == true ]]; then
-    if [ -z "$nvim_config_repo" ]; then
-        echo "No Nvim config repo to clone. Exiting..."
-        exit 1
-    fi
-
-    nvim_conf_dir="$HOME/.config/nvim"
-    [ ! -d "$nvim_conf_dir" ] && mkdir -p "$nvim_conf_dir"
-
-    git clone $nvim_config_repo "$nvim_conf_dir"
-
-    cat <<EOF >>"$HOME/.bashrc"
-
-export PATH="\$PATH:$nvim_install_dir/bin"
-EOF
-fi
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
 
 ######
 # Btop
@@ -872,7 +874,7 @@ done
 
 if [[ "$fresh_install" == true || "$nvm_update" == true ]]; then
     if [ -z "$nvm_install_url" ]; then
-        echo "nvim_install_url must be set"
+        echo "nvm_install_url must be set"
         exit 1
     fi
 
