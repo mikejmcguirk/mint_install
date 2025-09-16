@@ -546,7 +546,7 @@ fi
 #####
 
 fzf_repo="https://github.com/junegunn/fzf"
-fzf_tag="v0.65.1"
+fzf_tag="v0.65.2"
 fzf_update=false
 for arg in "$@"; do
     if [[ "$arg" == "fzf" || "$arg" == "all" ]]; then
@@ -1056,21 +1056,23 @@ fi
 #########
 
 ghostty_repo="https://github.com/ghostty-org/ghostty"
-ghostty_tag="v1.1.3"
+ghostty_tag="v1.2.0"
 ghostty_dir="$HOME/.local/bin/ghostty-git"
 
-zig_link="https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz"
+zig_link="https://ziglang.org/download/0.14.1/zig-x86_64-linux-0.14.1.tar.xz"
 ziglang_dir="/opt/ziglang"
 zig_file=$(basename $zig_link)
 zig_filepath=$ziglang_dir/"$zig_file"
 zig_dir=$(basename "$zig_filepath" .tar.xz)
+
+blueprint_repo="https://gitlab.gnome.org/GNOME/blueprint-compiler.git"
+blueprint_tag="v0.16.0"
 
 ghostty_update=false
 for arg in "$@"; do
     if [[ "$arg" == "ghostty" || "$arg" == "all" ]]; then
         ghostty_update=true
         echo "Updating Ghostty..."
-
         break
     fi
 done
@@ -1080,7 +1082,15 @@ for arg in "$@"; do
     if [[ "$arg" == "zig" || "$arg" == "all" ]]; then
         zig_update=true
         echo "Updating zig..."
+        break
+    fi
+done
 
+blueprint_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "blueprint" || "$arg" == "all" ]]; then
+        blueprint_update=true
+        echo "Updating blueprint-compiler..."
         break
     fi
 done
@@ -1088,12 +1098,15 @@ done
 if [ "$fresh_install" = true ]; then
     echo "Installing Ghostty..."
     echo "Installing zig..."
+    echo "Installing blueprint-compiler..."
 
     # Could be repeats, but here for insurance/documentation
     sudo apt install -y libgtk-4-dev
     sudo apt install -y libadwaita-1-dev
+    sudo apt install -y libxml2-utils
     sudo apt install -y git
-    sudo apt install -y blueprint-compiler
+    # sudo apt install -y blueprint-compiler # not on the deps list anymore
+    sudo apt install -y pkg-config
     sudo apt install -y gettext
     # ThePrimeagen has these included
     sudo apt install -y llvm
@@ -1102,10 +1115,14 @@ if [ "$fresh_install" = true ]; then
     sudo apt install -y liblld-dev
     sudo apt install -y clang
     sudo apt install -y libclang-dev
-    sudo apt install -y libglib2.0-dev
     # Other stuff that might help
     sudo apt install -y libegl1-mesa-dev
     sudo apt install -y libvulkan-dev
+
+    # blueprint-compiler
+    sudo apt install -y ninja-build
+    sudo apt install -y meson
+    sudo apt install -y libglib2.0-dev
 
     [ ! -d "$ziglang_dir" ] && sudo mkdir -p "$ziglang_dir"
     [ ! -d "$ghostty_dir" ] && mkdir -p "$ghostty_dir"
@@ -1124,6 +1141,43 @@ if [ "$fresh_install" = true ] || [ "$zig_update" = true ] || [ "$ghostty_update
         exit 1
     fi
 fi
+
+blueprint_git_dir="$HOME/.local/bin/blueprint-compiler"
+[ ! -d "$blueprint_git_dir" ] && mkdir -p "$blueprint_git_dir"
+if [[ "$fresh_install" == true ]]; then
+    git clone $blueprint_repo "$blueprint_git_dir"
+fi
+
+if [ "$fresh_install" = true ] || [ "$blueprint_update" = true ]; then
+    cd "$blueprint_git_dir" || {
+        echo "Error: Cannot cd to $blueprint_git_dir"
+        exit 1
+    }
+fi
+
+if [[ "$blueprint_update" == true ]]; then
+    git checkout --force main
+    git pull
+fi
+
+if [ "$fresh_install" = true ] || [ "$blueprint_update" = true ]; then
+    git checkout --force "$blueprint_tag" || {
+        echo "Error: Cannot checkout $blueprint_tag"
+        exit 1
+    }
+
+    rm -rf _build
+    meson _build
+    sudo ninja -C _build install
+    sudo ldconfig
+
+    echo "blueprint build complete"
+fi
+
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
 
 if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     cd "$ghostty_dir" || {
@@ -1145,7 +1199,8 @@ if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     git checkout --force "$ghostty_tag"
     # This will send the built file to ~/.local/bin
     rm -rf "$HOME/.cache/zig"
-    zig build -p "$HOME/.local" -Doptimize=ReleaseFast
+    # build gtk layer shell since it is not packaged (yet?) with Mint 22.1
+    zig build -p "$HOME/.local" -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
 
     cd "$HOME"
 fi
