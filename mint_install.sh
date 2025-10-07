@@ -390,7 +390,7 @@ fi
 # NOTE: Would changes to this affect betterlockscreen?
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.2-3"
+magick_tag="7.1.2-5"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
@@ -699,7 +699,7 @@ cd "$HOME" || {
 ######
 
 # https://github.com/aristocratos/btop
-btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.4/btop-x86_64-linux-musl.tbz"
+btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.5/btop-x86_64-linux-musl.tbz"
 btop_file=$(basename "$btop_url")
 
 btop_update=false
@@ -793,7 +793,7 @@ fi
 ##########
 
 # https://obsidian.md/download
-obsidian_url="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.9.12/obsidian_1.9.12_amd64.deb"
+obsidian_url="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.9.14/obsidian_1.9.14_amd64.deb"
 obsidian_file=$(basename "$obsidian_url")
 
 obsidian_update=false
@@ -902,7 +902,7 @@ npm i -g "bash-language-server"@latest
 ##############
 
 # https://go.dev/doc/install
-go_dl_url="https://go.dev/dl/go1.25.0.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.25.1.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -1056,7 +1056,7 @@ fi
 #########
 
 ghostty_repo="https://github.com/ghostty-org/ghostty"
-ghostty_tag="v1.2.0"
+ghostty_tag="v1.2.1"
 ghostty_dir="$HOME/.local/bin/ghostty-git"
 
 zig_link="https://ziglang.org/download/0.14.1/zig-x86_64-linux-0.14.1.tar.xz"
@@ -1105,7 +1105,7 @@ if [ "$fresh_install" = true ]; then
     sudo apt install -y libadwaita-1-dev
     sudo apt install -y libxml2-utils
     sudo apt install -y git
-    # sudo apt install -y blueprint-compiler # not on the deps list anymore
+    # sudo apt install -y blueprint-compiler # Repo version is out of date
     sudo apt install -y pkg-config
     sudo apt install -y gettext
     # ThePrimeagen has these included
@@ -1119,7 +1119,7 @@ if [ "$fresh_install" = true ]; then
     sudo apt install -y libegl1-mesa-dev
     sudo apt install -y libvulkan-dev
 
-    # blueprint-compiler
+    # For blueprint-compiler
     sudo apt install -y ninja-build
     sudo apt install -y meson
     sudo apt install -y libglib2.0-dev
