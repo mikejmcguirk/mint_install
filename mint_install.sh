@@ -683,7 +683,9 @@ if [ "$fresh_install" = true ] || [ "$nvim_update" = true ]; then
     }
 
     # rm -rf .deps build
+    echo "Setting build type"
     make CMAKE_BUILD_TYPE=Release
+    echo "Building"
     sudo make install
 
     echo "nvim build complete"
@@ -1358,6 +1360,7 @@ if [[ "$fresh_install" == true ]]; then
     "$cargo_bin" install --features luajit stylua
     "$cargo_bin" install tokei
     "$cargo_bin" install flamegraph
+    "$cargo_bin" install lemmy-help --features=cli
     "$cargo_bin" install --locked tree-sitter-cli
     "$cargo_bin" install --features 'pcre2' ripgrep # For Perl Compatible Regex
     sudo apt install -y libssl-dev
