@@ -857,6 +857,65 @@ fi
 
 pipx upgrade-all
 
+###############
+# Lua Ecosystem
+###############
+
+luajit_repo="https://luajit.org/git/luajit.git"
+luajit_tag="v2.1"
+
+luajit_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "luajit" || "$arg" == "all" ]]; then
+        if [[ "$fresh_install" == true ]]; then
+            echo "Cannot do a fresh install and a luajit update at the same time"
+            exit 1
+        fi
+
+        luajit_update=true
+        echo "Updating luajit..."
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$luajit_update" != true ]; then
+    echo "Installing luajit..."
+fi
+
+luajit_git_dir="$HOME/.local/bin/luajit"
+[ ! -d "$luajit_git_dir" ] && mkdir -p "$luajit_git_dir"
+
+if [[ "$fresh_install" == true ]]; then
+    git clone $luajit_repo "$luajit_git_dir"
+fi
+
+cd "$luajit_git_dir" || {
+    echo "Error: Cannot cd to $luajit_git_dir"
+    exit 1
+}
+
+if [[ "$luajit_update" == true ]]; then
+    git checkout --force master
+    git pull
+fi
+
+if [ "$fresh_install" = true ] || [ "$luajit_update" = true ]; then
+    git checkout --force "$luajit_tag" || {
+        echo "Error: Cannot checkout $luajit_tag"
+        exit 1
+    }
+
+    make
+    sudo make install
+
+    echo "luajit build complete"
+fi
+
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
+
 ######################
 # Javascript Ecosystem
 ######################
