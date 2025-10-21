@@ -390,7 +390,7 @@ fi
 # NOTE: Would changes to this affect betterlockscreen?
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.2-5"
+magick_tag="7.1.2-7"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
@@ -546,7 +546,7 @@ fi
 #####
 
 fzf_repo="https://github.com/junegunn/fzf"
-fzf_tag="v0.65.2"
+fzf_tag="v0.66.0"
 fzf_update=false
 for arg in "$@"; do
     if [[ "$arg" == "fzf" || "$arg" == "all" ]]; then
@@ -963,7 +963,7 @@ npm i -g "bash-language-server"@latest
 ##############
 
 # https://go.dev/doc/install
-go_dl_url="https://go.dev/dl/go1.25.1.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.25.3.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -1117,7 +1117,7 @@ fi
 #########
 
 ghostty_repo="https://github.com/ghostty-org/ghostty"
-ghostty_tag="v1.2.1"
+ghostty_tag="v1.2.2"
 ghostty_dir="$HOME/.local/bin/ghostty-git"
 
 zig_link="https://ziglang.org/download/0.14.1/zig-x86_64-linux-0.14.1.tar.xz"
