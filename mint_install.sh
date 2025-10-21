@@ -122,6 +122,8 @@ if [[ "$fresh_install" == true ]]; then
 
     git config --global user.name "Mike J. McGuirk"
     git config --global user.email "mike.j.mcguirk@gmail.com"
+    git config --global init.defaultBranch master
+
     # Rebase can do goofy stuff
     git config --global pull.rebase false
 
