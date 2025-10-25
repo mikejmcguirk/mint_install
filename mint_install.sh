@@ -979,6 +979,14 @@ cd "$HOME" || {
     exit 1
 }
 
+if [[ "$fresh_install" == true ]]; then
+    # To locate the lua.h file
+    sudo luarocks config variables.LUA_INCDIR "/usr/local/include/luajit-2.1"
+fi
+
+# TODO: Not totally sure if this actually updates
+sudo luarocks install busted
+
 ######################
 # Javascript Ecosystem
 ######################
