@@ -863,6 +863,10 @@ pipx upgrade-all
 # Lua Ecosystem
 ###############
 
+if [[ "$fresh_install" == true ]]; then
+    sudo apt install build-essential libreadline-dev unzip
+fi
+
 luajit_repo="https://luajit.org/git/luajit.git"
 luajit_tag="v2.1"
 
@@ -911,6 +915,63 @@ if [ "$fresh_install" = true ] || [ "$luajit_update" = true ]; then
     sudo make install
 
     echo "luajit build complete"
+fi
+
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
+
+luarocks_repo="https://github.com/luarocks/luarocks"
+luarocks_tag="v3.12.2"
+
+luarocks_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "luarocks" || "$arg" == "all" ]]; then
+        if [[ "$fresh_install" == true ]]; then
+            echo "Cannot do a fresh install and a luarocks update at the same time"
+            exit 1
+        fi
+
+        luarocks_update=true
+        echo "Updating luarocks..."
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$luarocks_update" != true ]; then
+    echo "Installing luarocks..."
+fi
+
+luarocks_git_dir="$HOME/.local/bin/luarocks"
+[ ! -d "$luarocks_git_dir" ] && mkdir -p "$luarocks_git_dir"
+
+if [[ "$fresh_install" == true ]]; then
+    git clone $luarocks_repo "$luarocks_git_dir"
+fi
+
+cd "$luarocks_git_dir" || {
+    echo "Error: Cannot cd to $luarocks_git_dir"
+    exit 1
+}
+
+if [[ "$luarocks_update" == true ]]; then
+    git checkout --force main
+    git pull
+fi
+
+if [ "$fresh_install" = true ] || [ "$luarocks_update" = true ]; then
+    git checkout --force "$luarocks_tag" || {
+        echo "Error: Cannot checkout $luarocks_tag"
+        exit 1
+    }
+
+    # Detects LuaJIT as Lua 5.1
+    ./configure --with-lua-include=/usr/local/include
+    make
+    sudo make install
+
+    echo "luarocks build complete"
 fi
 
 cd "$HOME" || {
