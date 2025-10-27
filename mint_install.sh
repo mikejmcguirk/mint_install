@@ -986,6 +986,7 @@ fi
 
 # TODO: Not totally sure if this actually updates
 sudo luarocks install busted
+sudo luarocks install nlua
 
 ######################
 # Javascript Ecosystem
