@@ -792,48 +792,6 @@ export PATH="\$PATH:$lua_ls_install_dir/bin"
 EOF
 fi
 
-##########
-# Obsidian
-##########
-
-# https://obsidian.md/download
-obsidian_url="https://github.com/obsidianmd/obsidian-releases/releases/download/v1.9.14/obsidian_1.9.14_amd64.deb"
-obsidian_file=$(basename "$obsidian_url")
-
-obsidian_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "obsidian" || "$arg" == "all" ]]; then
-        obsidian_update=true
-        echo "Updating Obsidian..."
-
-        break
-    fi
-done
-
-if [[ "$fresh_install" == true && "$obsidian_update" != true ]]; then
-    echo "Installing Obsidian..."
-fi
-
-if [[ "$fresh_install" == true || "$obsidian_update" == true ]]; then
-    if [ -z "$obsidian_url" ] || [ -z "$obsidian_file" ]; then
-        echo "Error: obsidian_url and obsidian_file must be set"
-        exit 1
-    fi
-
-    curl -LO --output-dir "$HOME/.local" "$obsidian_url" || {
-        echo "Obsidian curl failed"
-        exit 1
-    }
-    sudo apt install -y "$HOME/.local/$obsidian_file" || {
-        echo "Unable to install Obsidian Deb file"
-        exit 1
-    }
-    rm "$HOME/.local/$obsidian_file" || {
-        echo "Unable to delete Obsidian Deb file"
-        exit 1
-    }
-fi
-
 ##################
 # Python Ecosystem
 ##################
@@ -1496,6 +1454,7 @@ if [[ "$fresh_install" == true ]]; then
     "$cargo_bin" install --features 'pcre2' ripgrep # For Perl Compatible Regex
     sudo apt install -y libssl-dev
     "$cargo_bin" install cargo-update
+    "$cargo_bin" install --locked --git https://github.com/Feel-ix-343/markdown-oxide.git markdown-oxide
 else
     $cargo_bin install-update -a
 fi
