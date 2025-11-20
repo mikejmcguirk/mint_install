@@ -1448,6 +1448,8 @@ if [[ "$fresh_install" == true ]]; then
     "$cargo_bin" install --features lsp --locked taplo-cli
     "$cargo_bin" install --features luajit stylua
     "$cargo_bin" install tokei
+    "$cargo_bin" install --locked typst-cli
+    "$cargo_bin" install typstyle --locked
     "$cargo_bin" install flamegraph
     "$cargo_bin" install lemmy-help --features=cli
     "$cargo_bin" install --locked tree-sitter-cli
@@ -1458,6 +1460,62 @@ if [[ "$fresh_install" == true ]]; then
 else
     $cargo_bin install-update -a
 fi
+
+if [[ "$fresh_install" == true ]]; then
+    sudo apt install build-essential libreadline-dev unzip
+fi
+
+tinymist_repo="https://github.com/Myriad-Dreamin/tinymist.git"
+tinymist_tag="v0.14.2-rc1"
+tinymist_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "tinymist" || "$arg" == "all" ]]; then
+        if [[ "$fresh_install" == true ]]; then
+            echo "Cannot do a fresh install and a tinymist update at the same time"
+            exit 1
+        fi
+
+        tinymist_update=true
+        echo "Updating tinymist..."
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$tinymist_update" != true ]; then
+    echo "Installing tinymist..."
+fi
+
+tinymist_git_dir="$HOME/.local/bin/tinymist"
+[ ! -d "$tinymist_git_dir" ] && mkdir -p "$tinymist_git_dir"
+
+if [[ "$fresh_install" == true ]]; then
+    git clone $tinymist_repo "$tinymist_git_dir"
+fi
+
+cd "$tinymist_git_dir" || {
+    echo "Error: Cannot cd to $tinymist_git_dir"
+    exit 1
+}
+
+if [[ "$tinymist_update" == true ]]; then
+    git checkout --force main
+    git pull
+fi
+
+if [ "$fresh_install" = true ] || [ "$tinymist_update" = true ]; then
+    git checkout --force "$tinymist_tag" || {
+        echo "Error: Cannot checkout $tinymist_tag"
+        exit 1
+    }
+
+    "$cargo_bin" install --path crates/tinymist-cli --locked tinymist-cli
+    echo "tinymist build complete"
+fi
+
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
 
 #########
 # Wrap Up
