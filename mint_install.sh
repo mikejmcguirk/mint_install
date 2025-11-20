@@ -2,6 +2,8 @@
 
 # TODO: See about using star tags. Maybe get the current tag in here, then the star tag, and see
 # if an update is needed
+# TODO: Fresh install should take args
+# MAYBE: Outline the git repo stuff, since most of the logic is common
 
 set -e # quit on error
 cp "$HOME/.bashrc" "$HOME/.bashrc.bak"
