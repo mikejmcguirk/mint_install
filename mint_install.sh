@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# TODO: Move anything that's install based to build from source based
 # TODO: See about using star tags. Maybe get the current tag in here, then the star tag, and see
 # if an update is needed
 # TODO: Fresh install should take args
-# MAYBE: Outline the git repo stuff, since most of the logic is common
+# MAYBE: Outline the git repo stuff, since most of the logic is common. Apply it to place where
+# it is not if possible
 
 set -e # quit on error
 cp "$HOME/.bashrc" "$HOME/.bashrc.bak"
@@ -394,7 +396,7 @@ fi
 # NOTE: Would changes to this affect betterlockscreen?
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.2-7"
+magick_tag="7.1.2-8"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
@@ -550,7 +552,7 @@ fi
 #####
 
 fzf_repo="https://github.com/junegunn/fzf"
-fzf_tag="v0.66.0"
+fzf_tag="v0.67.0"
 fzf_update=false
 for arg in "$@"; do
     if [[ "$arg" == "fzf" || "$arg" == "all" ]]; then
@@ -827,6 +829,7 @@ if [[ "$fresh_install" == true ]]; then
     sudo apt install build-essential libreadline-dev unzip
 fi
 
+# https://luajit.org/status.html
 luajit_repo="https://luajit.org/git/luajit.git"
 luajit_tag="v2.1"
 
@@ -994,8 +997,8 @@ npm i -g "bash-language-server"@latest
 # Go Ecosystem
 ##############
 
-# https://go.dev/doc/install
-go_dl_url="https://go.dev/dl/go1.25.3.linux-amd64.tar.gz"
+# https://go.dev/dl/
+go_dl_url="https://go.dev/dl/go1.25.4.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -1148,8 +1151,12 @@ fi
 # Ghostty
 #########
 
+# NOTE: The build command is currently altered due to a problem build dep. Per the issue below, a
+# branch will be cut to address, and the build command needs to be reverted
+# https://github.com/ghostty-org/ghostty/issues/9606
+
 ghostty_repo="https://github.com/ghostty-org/ghostty"
-ghostty_tag="v1.2.2"
+ghostty_tag="v1.2.3"
 ghostty_dir="$HOME/.local/bin/ghostty-git"
 
 zig_link="https://ziglang.org/download/0.14.1/zig-x86_64-linux-0.14.1.tar.xz"
@@ -1293,7 +1300,8 @@ if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     # This will send the built file to ~/.local/bin
     rm -rf "$HOME/.cache/zig"
     # build gtk layer shell since it is not packaged (yet?) with Mint 22.1
-    zig build -p "$HOME/.local" -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
+    # zig build -p "$HOME/.local" -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
+    zig build -p "$HOME/.local" -Demit-themes=false -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
 
     cd "$HOME"
 fi
@@ -1468,7 +1476,7 @@ if [[ "$fresh_install" == true ]]; then
 fi
 
 tinymist_repo="https://github.com/Myriad-Dreamin/tinymist.git"
-tinymist_tag="v0.14.2-rc1"
+tinymist_tag="v0.14.2"
 tinymist_update=false
 for arg in "$@"; do
     if [[ "$arg" == "tinymist" || "$arg" == "all" ]]; then
