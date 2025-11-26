@@ -887,7 +887,6 @@ cd "$HOME" || {
 
 luarocks_repo="https://github.com/luarocks/luarocks"
 luarocks_tag="v3.12.2"
-
 luarocks_update=false
 for arg in "$@"; do
     if [[ "$arg" == "luarocks" || "$arg" == "all" ]]; then
@@ -1520,6 +1519,76 @@ if [ "$fresh_install" = true ] || [ "$tinymist_update" = true ]; then
 
     "$cargo_bin" install --path crates/tinymist-cli --locked tinymist-cli
     echo "tinymist build complete"
+fi
+
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
+
+#############
+# C Ecosystem
+#############
+
+# Last because clangd takes a while to build
+
+llvm_repo="https://github.com/llvm/llvm-project/"
+llvm_tag="llvmorg-21.1.6"
+llvm_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "llvm" || "$arg" == "all" ]]; then
+        if [[ "$fresh_install" == true ]]; then
+            echo "Cannot do a fresh install and a llvm update at the same time"
+            exit 1
+        fi
+
+        llvm_update=true
+        echo "Updating llvm..."
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$llvm_update" != true ]; then
+    echo "Installing llvm..."
+fi
+
+llvm_git_dir="$HOME/.local/bin/llvm"
+[ ! -d "$llvm_git_dir" ] && mkdir -p "$llvm_git_dir"
+
+if [[ "$fresh_install" == true ]]; then
+    git clone $llvm_repo "$llvm_git_dir"
+fi
+
+cd "$llvm_git_dir" || {
+    echo "Error: Cannot cd to $llvm_git_dir"
+    exit 1
+}
+
+if [[ "$llvm_update" == true ]]; then
+    git checkout --force main
+    git pull
+fi
+
+if [ "$fresh_install" = true ] || [ "$llvm_update" = true ]; then
+    git checkout --force "$llvm_tag" || {
+        echo "Error: Cannot checkout $llvm_tag"
+        exit 1
+    }
+
+    llvm_builddir="$llvm_git_dir/build"
+    [ ! -d "$llvm_builddir" ] && mkdir -p "$llvm_builddir"
+    cd "$llvm_builddir"
+    cmake "$llvm_git_dir/llvm/" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"
+    cd "$llvm_builddir"
+    cmake --build "$llvm_git_dir/build" --target clangd
+    echo "llvm build complete"
+fi
+
+if [[ "$fresh_install" == true ]]; then
+    cat <<EOF >>"$HOME/.bashrc"
+
+export PATH="\$PATH:$llvm_git_dir/build/bin"
+EOF
 fi
 
 cd "$HOME" || {
