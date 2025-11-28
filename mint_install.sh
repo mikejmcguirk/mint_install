@@ -817,6 +817,7 @@ EOF
     pipx runpip beautysh install setuptools
     pipx install ruff
     pipx install python-lsp-server[all]
+    pipx inject python-lsp-server pylsp-mypy
 fi
 
 pipx upgrade-all
