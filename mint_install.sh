@@ -161,6 +161,7 @@ if [[ "$fresh_install" == true ]]; then
     sudo apt install -y wordnet
     sudo apt install -y qbittorrent
     sudo apt install -y kolourpaint
+    sudo apt install -y unrar
 
     sudo apt remove -y drawing
     sudo apt remove -y mintupdate
