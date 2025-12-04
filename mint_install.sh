@@ -1462,7 +1462,7 @@ if [[ "$fresh_install" == true ]]; then
     "$cargo_bin" install --locked typst-cli
     "$cargo_bin" install typstyle --locked
     "$cargo_bin" install flamegraph
-    "$cargo_bin" install lemmy-help --features=cli
+    "$cargo_bin" install vimcats --features=cli
     "$cargo_bin" install --locked tree-sitter-cli
     "$cargo_bin" install --features 'pcre2' ripgrep # For Perl Compatible Regex
     sudo apt install -y libssl-dev
