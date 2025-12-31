@@ -100,6 +100,7 @@ sudo apt upgrade -y
 
 if [[ "$fresh_install" == true ]]; then
     sudo apt install -y fd-find
+    sudo apt install -y inotify-tools
     sudo apt install -y vim
     sudo apt install -y sqlite3
     sudo apt install -y virtualbox
