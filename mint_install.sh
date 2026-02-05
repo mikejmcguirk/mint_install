@@ -1478,7 +1478,7 @@ if [[ "$fresh_install" == true ]]; then
 fi
 
 tinymist_repo="https://github.com/Myriad-Dreamin/tinymist.git"
-tinymist_tag="v0.14.2"
+tinymist_tag="v0.14.10"
 tinymist_update=false
 for arg in "$@"; do
     if [[ "$arg" == "tinymist" || "$arg" == "all" ]]; then
