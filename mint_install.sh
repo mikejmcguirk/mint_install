@@ -1324,7 +1324,7 @@ if [ "$fresh_install" = true ]; then
 fi
 
 tmux_url="https://github.com/tmux/tmux"
-tmux_branch="tmux-3.6a"
+tmux_branch="3.6a"
 tpm_repo="https://github.com/tmux-plugins/tpm"
 tmux_power_repo="https://github.com/wfxr/tmux-power"
 
