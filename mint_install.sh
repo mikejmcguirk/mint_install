@@ -889,8 +889,10 @@ cd "$HOME" || {
     exit 1
 }
 
+# TODO: How does 3.13.0 show when it's not part of the repo?
+
 luarocks_repo="https://github.com/luarocks/luarocks"
-luarocks_tag="v3.13.0"
+luarocks_tag="v3.12.2"
 luarocks_update=false
 for arg in "$@"; do
     if [[ "$arg" == "luarocks" || "$arg" == "all" ]]; then
