@@ -398,7 +398,7 @@ fi
 # NOTE: Would changes to this affect betterlockscreen?
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.2-8"
+magick_tag="7.1.2-13"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
@@ -489,7 +489,7 @@ fi
 # TODO: Prefs file is incorrect
 # https://www.spotify.com/de-en/download/linux/
 # Check directions for updated key
-spotify_key="https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg"
+spotify_key="https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc"
 spotify_update=false
 for arg in "$@"; do
     if [[ "$arg" == "spotify" || "$arg" == "all" ]]; then
@@ -709,7 +709,7 @@ cd "$HOME" || {
 ######
 
 # https://github.com/aristocratos/btop
-btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.5/btop-x86_64-linux-musl.tbz"
+btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.6/btop-x86_64-unknown-linux-musl.tbz"
 btop_file=$(basename "$btop_url")
 
 btop_update=false
@@ -757,7 +757,7 @@ fi
 ################
 
 # https://github.com/LuaLS/lua-language-server
-lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.15.0/lua-language-server-3.15.0-linux-x64.tar.gz"
+lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.17.1/lua-language-server-3.17.1-linux-x64.tar.gz"
 lua_ls_file=$(basename "$lua_ls_url")
 
 lua_ls_update=false
@@ -834,6 +834,7 @@ fi
 
 # https://luajit.org/status.html
 luajit_repo="https://luajit.org/git/luajit.git"
+# NOTE: The tag is regularly updated with fixes/backports
 luajit_tag="v2.1"
 
 luajit_update=false
@@ -889,7 +890,7 @@ cd "$HOME" || {
 }
 
 luarocks_repo="https://github.com/luarocks/luarocks"
-luarocks_tag="v3.12.2"
+luarocks_tag="v3.13.0"
 luarocks_update=false
 for arg in "$@"; do
     if [[ "$arg" == "luarocks" || "$arg" == "all" ]]; then
@@ -959,7 +960,7 @@ sudo luarocks install nlua
 
 # https://github.com/nvm-sh/nvm
 # Check that the install cmd is up to date as well
-nvm_install_url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh"
+nvm_install_url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh"
 nvm_update=false
 for arg in "$@"; do
     if [[ "$arg" == "nvm" || "$arg" == "all" ]]; then
@@ -1000,7 +1001,7 @@ npm i -g "bash-language-server"@latest
 ##############
 
 # https://go.dev/dl/
-go_dl_url="https://go.dev/dl/go1.25.4.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.25.7.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -1321,7 +1322,7 @@ if [ "$fresh_install" = true ]; then
 fi
 
 tmux_url="https://github.com/tmux/tmux"
-tmux_branch="tmux-3.5a"
+tmux_branch="tmux-3.6a"
 tpm_repo="https://github.com/tmux-plugins/tpm"
 tmux_power_repo="https://github.com/wfxr/tmux-power"
 
@@ -1477,6 +1478,10 @@ if [[ "$fresh_install" == true ]]; then
     sudo apt install build-essential libreadline-dev unzip
 fi
 
+##########
+# Tinymist
+##########
+
 tinymist_repo="https://github.com/Myriad-Dreamin/tinymist.git"
 tinymist_tag="v0.14.10"
 tinymist_update=false
@@ -1536,7 +1541,7 @@ cd "$HOME" || {
 # Last because clangd takes a while to build
 
 llvm_repo="https://github.com/llvm/llvm-project/"
-llvm_tag="llvmorg-21.1.6"
+llvm_tag="llvmorg-21.1.8"
 llvm_update=false
 for arg in "$@"; do
     if [[ "$arg" == "llvm" || "$arg" == "all" ]]; then
