@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: Audit that this script works on a VM (last: unknown)
+# TODO: Check if my version of Mint is still in its support window
 # TODO: Move anything that's install based to build from source based
 # TODO: See about using star tags. Maybe get the current tag in here, then the star tag, and see
 # if an update is needed
@@ -301,6 +303,10 @@ EOF
     echo "Successfully configured $reboot_shutdown_file"
 fi
 
+# NOTE: i3lock-color, magick, and bls are up here on account of install ordering. These repos are
+# rarely updated and should only be checked month.
+# LAST: 2026-03-03
+
 #####################################
 # i3lock-color (betterlockscreen dep)
 #####################################
@@ -395,7 +401,8 @@ fi
 # ImageMagick (betterlockscreen dep)
 ####################################
 
-# NOTE: Would changes to this affect betterlockscreen?
+# NOTE: Only update this every other tag or so, due to the frequency of new versions and the length
+# of the build times.
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
 magick_tag="7.1.2-13"
@@ -482,6 +489,32 @@ if [[ "$fresh_install" == true || "$bls_update" == true ]]; then
     wget $bls_url -O - -q | bash -s user $bls_tag
 fi
 
+##################
+# Python Ecosystem
+##################
+
+if [[ "$fresh_install" == true ]]; then
+    sudo apt install -y python3-full
+    sudo apt install -y python3-pip
+    sudo apt install -y pipx
+
+    pipx ensurepath # Adds ~/.local/bin to path
+    # Add pipx completions
+    cat <<'EOF' >>"$HOME/.bashrc"
+
+eval "$(register-python-argcomplete pipx)"
+EOF
+
+    pipx install nvitop
+    # pipx install beautysh
+    pipx runpip beautysh install setuptools
+    pipx install ruff
+    pipx install python-lsp-server[all]
+    pipx inject python-lsp-server pylsp-mypy
+fi
+
+pipx upgrade-all
+
 #########
 # Spotify
 #########
@@ -540,6 +573,58 @@ if [[ "$fresh_install" == true || "$spotify_update" == true ]]; then
     echo "Spotify preferences updated successfully."
 fi
 
+#########
+# Discord
+#########
+
+discord_url="https://discord.com/api/download?platform=linux&format=deb"
+discord_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "discord" || "$arg" == "all" ]]; then
+        discord_update=true
+        echo "Updating Discord..."
+
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$discord_update" != true ]; then
+    echo "Installing Discord..."
+fi
+
+if [[ "$fresh_install" == true || "$discord_update" == true ]]; then
+    if [ -z "$discord_url" ]; then
+        echo "Error: discord_url must be set."
+        exit 1
+    fi
+
+    discord_dl_dir="$HOME/.local"
+    [ ! -d "$discord_dl_dir" ] && mkdir -p "$discord_dl_dir"
+
+    deb_file="$discord_dl_dir/discord_deb.deb"
+    echo "Downloading Discord .deb from $discord_url..."
+
+    if ! curl -L -o "$deb_file" "$discord_url"; then
+        echo "Unable to download Discord .deb, continuing..."
+    else
+        file_type=$(file -b "$deb_file")
+        if [[ "$file_type" =~ "Debian binary package" ]]; then
+            echo "It's a deb file! Installing..."
+
+            if sudo apt install -y "$deb_file"; then
+                echo "Discord installed successfully"
+            else
+                echo "Unable to install Discord .deb, continuing..."
+            fi
+        else
+            echo "Downloaded file is not a .deb package (type: $file_type)."
+            echo "Removing and continuing..."
+        fi
+    fi
+
+    rm -f "$deb_file"
+fi
+
 ###############
 # Brave Browser
 ###############
@@ -549,12 +634,16 @@ if [[ "$fresh_install" == true ]]; then
     sudo apt remove -y firefox
 fi
 
+##########################################
+# Frequently Updated Repos. Check Weekly #
+##########################################
+
 #####
 # fzf
 #####
 
 fzf_repo="https://github.com/junegunn/fzf"
-fzf_tag="v0.67.0"
+fzf_tag="v0.70.0"
 fzf_update=false
 for arg in "$@"; do
     if [[ "$arg" == "fzf" || "$arg" == "all" ]]; then
@@ -589,41 +678,6 @@ if [[ "$fresh_install" == true || "$fzf_update" == true ]]; then
 
     bash install --key-bindings --completion --no-update-rc
     cd "$HOME"
-fi
-
-#######
-# words
-#######
-
-words_repo="https://github.com/dwyl/english-words"
-words_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "words" || "$arg" == "all" ]]; then
-        words_update=true
-        echo "Updating words..."
-
-        break
-    fi
-done
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install wordnet
-fi
-
-words_git_dir="$HOME/.local/bin/words"
-if [[ "$fresh_install" == true || "$words_update" == true ]]; then
-    [ ! -d "$words_git_dir" ] && mkdir -p "$words_git_dir"
-    cd "$words_git_dir" || {
-        echo "Error: Cannot cd to $words_git_dir"
-        exit 1
-    }
-fi
-
-if [[ "$fresh_install" == true ]]; then
-    git clone $words_repo "$words_git_dir"
-elif [[ "$words_update" == true ]]; then
-    git checkout --force master
-    git pull
 fi
 
 ########
@@ -704,6 +758,71 @@ cd "$HOME" || {
     exit 1
 }
 
+##############
+# Go Ecosystem
+##############
+
+# https://go.dev/dl/
+go_dl_url="https://go.dev/dl/go1.26.0.linux-amd64.tar.gz"
+go_tar=$(basename "$go_dl_url")
+
+go_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "go" || "$arg" == "all" ]]; then
+        go_update=true
+        echo "Updating Go..."
+
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$go_update" != true ]; then
+    echo "Installing Go..."
+fi
+
+go_install_dir="/usr/local/go"
+
+if [[ "$fresh_install" == true || "$go_update" == true ]]; then
+    if [ -z "$go_dl_url" ] || [ -z "$go_tar" ]; then
+        echo "Error: go_dl_url and go_tar must be set."
+        exit 1
+    fi
+
+    if [ -d "$go_install_dir" ]; then
+        echo "Removing existing Go installation at $go_install_dir..."
+        sudo rm -rf $go_install_dir
+    else
+        echo "No existing Go installation found at $go_install_dir"
+    fi
+
+    go_dl_dir="$HOME/.local"
+    wget -P "$go_dl_dir" "$go_dl_url"
+    sudo tar -C /usr/local -xzf "$go_dl_dir/$go_tar"
+    rm "$go_dl_dir/$go_tar"
+fi
+
+go_install_bin=$go_install_dir/bin
+export PATH=$PATH:$go_install_bin
+export GOPATH=$(go env GOPATH)
+export PATH=$PATH:$GOPATH/bin
+
+if [[ "$fresh_install" == true ]]; then
+    echo "Adding Go paths to $HOME/.bashrc..."
+    cat <<EOF >>"$HOME/.bashrc"
+
+# Go environment setup
+export PATH=\$PATH:$go_install_bin
+export GOPATH=\$(go env GOPATH)
+export PATH=\$PATH:\$GOPATH/bin
+EOF
+fi
+
+go install mvdan.cc/gofumpt@latest
+go install mvdan.cc/sh/v3/cmd/shfmt@latest
+go install golang.org/x/tools/gopls@latest
+go install github.com/nametake/golangci-lint-langserver@latest
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
 ######
 # Btop
 ######
@@ -755,74 +874,6 @@ fi
 ################
 # Install Lua LS
 ################
-
-# https://github.com/LuaLS/lua-language-server
-lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.17.1/lua-language-server-3.17.1-linux-x64.tar.gz"
-lua_ls_file=$(basename "$lua_ls_url")
-
-lua_ls_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "lua_ls" || "$arg" == "all" ]]; then
-        lua_ls_update=true
-        echo "Updating Lua LS..."
-
-        break
-    fi
-done
-
-lua_ls_install_dir="$HOME/.local/bin/lua_ls"
-
-if [[ "$fresh_install" == true || "$lua_ls_update" == true ]]; then
-    if [ -z "$lua_ls_url" ] || [ -z "$lua_ls_file" ]; then
-        echo "Error: lua_ls_url and lua_ls_file must be set"
-        exit 1
-    fi
-
-    if [ -d "$lua_ls_install_dir" ]; then
-        echo "Removing existing lua_ls installation at $lua_ls_install_dir..."
-        rm -rf "$lua_ls_install_dir"
-    else
-        echo "No existing lua_ls installation found at $lua_ls_install_dir"
-    fi
-
-    # Files are in the top level of the tar
-    wget -P "$lua_ls_install_dir" $lua_ls_url
-    tar xzf "$lua_ls_install_dir/$lua_ls_file" -C "$lua_ls_install_dir"
-    rm "$lua_ls_install_dir/$lua_ls_file"
-fi
-
-if [[ "$fresh_install" == true ]]; then
-    cat <<EOF >>"$HOME/.bashrc"
-
-export PATH="\$PATH:$lua_ls_install_dir/bin"
-EOF
-fi
-
-##################
-# Python Ecosystem
-##################
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y python3-full
-    sudo apt install -y python3-pip
-    sudo apt install -y pipx
-
-    pipx ensurepath # Adds ~/.local/bin to path
-    # Add pipx completions
-    cat <<'EOF' >>"$HOME/.bashrc"
-
-eval "$(register-python-argcomplete pipx)"
-EOF
-
-    pipx install nvitop
-    # pipx install beautysh
-    pipx runpip beautysh install setuptools
-    pipx install ruff
-    pipx install python-lsp-server[all]
-    pipx inject python-lsp-server pylsp-mypy
-fi
-
-pipx upgrade-all
 
 ###############
 # Lua Ecosystem
@@ -889,6 +940,7 @@ cd "$HOME" || {
     exit 1
 }
 
+# NOTE: Check if the 3.13.0 tag is part of the repo first.
 # TODO: How does 3.13.0 show when it's not part of the repo?
 
 luarocks_repo="https://github.com/luarocks/luarocks"
@@ -956,6 +1008,55 @@ fi
 sudo luarocks install busted
 sudo luarocks install nlua
 
+# https://github.com/LuaLS/lua-language-server
+# Keep at 3.16.4 because of https://github.com/folke/lazydev.nvim/issues/136
+lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.16.4/lua-language-server-3.16.4-linux-x64.tar.gz"
+lua_ls_file=$(basename "$lua_ls_url")
+
+lua_ls_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "lua_ls" || "$arg" == "all" ]]; then
+        lua_ls_update=true
+        echo "Updating Lua LS..."
+
+        break
+    fi
+done
+
+lua_ls_install_dir="$HOME/.local/bin/lua_ls"
+
+if [[ "$fresh_install" == true || "$lua_ls_update" == true ]]; then
+    if [ -z "$lua_ls_url" ] || [ -z "$lua_ls_file" ]; then
+        echo "Error: lua_ls_url and lua_ls_file must be set"
+        exit 1
+    fi
+
+    if [ -d "$lua_ls_install_dir" ]; then
+        echo "Removing existing lua_ls installation at $lua_ls_install_dir..."
+        rm -rf "$lua_ls_install_dir"
+    else
+        echo "No existing lua_ls installation found at $lua_ls_install_dir"
+    fi
+
+    # Files are in the top level of the tar
+    wget -P "$lua_ls_install_dir" $lua_ls_url
+    tar xzf "$lua_ls_install_dir/$lua_ls_file" -C "$lua_ls_install_dir"
+    rm "$lua_ls_install_dir/$lua_ls_file"
+fi
+
+if [[ "$fresh_install" == true ]]; then
+    cat <<EOF >>"$HOME/.bashrc"
+
+export PATH="\$PATH:$lua_ls_install_dir/bin"
+EOF
+fi
+
+##########################################
+# Less Frequently Updated. Check Monthly #
+##########################################
+
+# LAST: 2026-03-03
+
 ######################
 # Javascript Ecosystem
 ######################
@@ -997,123 +1098,6 @@ npm i -g "eslint"@latest
 npm i -g "prettier"@latest
 npm i -g "vscode-langservers-extracted"@latest
 npm i -g "bash-language-server"@latest
-
-##############
-# Go Ecosystem
-##############
-
-# https://go.dev/dl/
-go_dl_url="https://go.dev/dl/go1.25.7.linux-amd64.tar.gz"
-go_tar=$(basename "$go_dl_url")
-
-go_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "go" || "$arg" == "all" ]]; then
-        go_update=true
-        echo "Updating Go..."
-
-        break
-    fi
-done
-
-if [ "$fresh_install" = true ] && [ "$go_update" != true ]; then
-    echo "Installing Go..."
-fi
-
-go_install_dir="/usr/local/go"
-
-if [[ "$fresh_install" == true || "$go_update" == true ]]; then
-    if [ -z "$go_dl_url" ] || [ -z "$go_tar" ]; then
-        echo "Error: go_dl_url and go_tar must be set."
-        exit 1
-    fi
-
-    if [ -d "$go_install_dir" ]; then
-        echo "Removing existing Go installation at $go_install_dir..."
-        sudo rm -rf $go_install_dir
-    else
-        echo "No existing Go installation found at $go_install_dir"
-    fi
-
-    go_dl_dir="$HOME/.local"
-    wget -P "$go_dl_dir" "$go_dl_url"
-    sudo tar -C /usr/local -xzf "$go_dl_dir/$go_tar"
-    rm "$go_dl_dir/$go_tar"
-fi
-
-go_install_bin=$go_install_dir/bin
-export PATH=$PATH:$go_install_bin
-export GOPATH=$(go env GOPATH)
-export PATH=$PATH:$GOPATH/bin
-
-if [[ "$fresh_install" == true ]]; then
-    echo "Adding Go paths to $HOME/.bashrc..."
-    cat <<EOF >>"$HOME/.bashrc"
-
-# Go environment setup
-export PATH=\$PATH:$go_install_bin
-export GOPATH=\$(go env GOPATH)
-export PATH=\$PATH:\$GOPATH/bin
-EOF
-fi
-
-go install mvdan.cc/gofumpt@latest
-go install mvdan.cc/sh/v3/cmd/shfmt@latest
-go install golang.org/x/tools/gopls@latest
-go install github.com/nametake/golangci-lint-langserver@latest
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-
-#########
-# Discord
-#########
-
-discord_url="https://discord.com/api/download?platform=linux&format=deb"
-discord_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "discord" || "$arg" == "all" ]]; then
-        discord_update=true
-        echo "Updating Discord..."
-
-        break
-    fi
-done
-
-if [ "$fresh_install" = true ] && [ "$discord_update" != true ]; then
-    echo "Installing Discord..."
-fi
-
-if [[ "$fresh_install" == true || "$discord_update" == true ]]; then
-    if [ -z "$discord_url" ]; then
-        echo "Error: discord_url must be set."
-        exit 1
-    fi
-
-    discord_dl_dir="$HOME/.local"
-    [ ! -d "$discord_dl_dir" ] && mkdir -p "$discord_dl_dir"
-
-    deb_file="$discord_dl_dir/discord_deb.deb"
-    echo "Downloading Discord .deb from $discord_url..."
-
-    if ! curl -L -o "$deb_file" "$discord_url"; then
-        echo "Unable to download Discord .deb, continuing..."
-    else
-        file_type=$(file -b "$deb_file")
-        if [[ "$file_type" =~ "Debian binary package" ]]; then
-            echo "It's a deb file! Installing..."
-
-            if sudo apt install -y "$deb_file"; then
-                echo "Discord installed successfully"
-            else
-                echo "Unable to install Discord .deb, continuing..."
-            fi
-        else
-            echo "Downloaded file is not a .deb package (type: $file_type)."
-            echo "Removing and continuing..."
-        fi
-    fi
-
-    rm -f "$deb_file"
-fi
 
 ###############
 # Add Nerd Font
@@ -1422,6 +1406,41 @@ if [[ "$tmux_update" == true ]]; then
     }
 fi
 
+#######
+# words
+#######
+
+words_repo="https://github.com/dwyl/english-words"
+words_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "words" || "$arg" == "all" ]]; then
+        words_update=true
+        echo "Updating words..."
+
+        break
+    fi
+done
+
+if [[ "$fresh_install" == true ]]; then
+    sudo apt install wordnet
+fi
+
+words_git_dir="$HOME/.local/bin/words"
+if [[ "$fresh_install" == true || "$words_update" == true ]]; then
+    [ ! -d "$words_git_dir" ] && mkdir -p "$words_git_dir"
+    cd "$words_git_dir" || {
+        echo "Error: Cannot cd to $words_git_dir"
+        exit 1
+    }
+fi
+
+if [[ "$fresh_install" == true ]]; then
+    git clone $words_repo "$words_git_dir"
+elif [[ "$words_update" == true ]]; then
+    git checkout --force master
+    git pull
+fi
+
 #############
 # Apt Cleanup
 #############
@@ -1540,10 +1559,12 @@ cd "$HOME" || {
 # C Ecosystem
 #############
 
+# TODO: For VM Tests I think there needs to be a way to skip this one. Takes hours even on a real
+# computer.
 # Last because clangd takes a while to build
 
 llvm_repo="https://github.com/llvm/llvm-project/"
-llvm_tag="llvmorg-21.1.8"
+llvm_tag="llvmorg-22.1.0"
 llvm_update=false
 for arg in "$@"; do
     if [[ "$arg" == "llvm" || "$arg" == "all" ]]; then
@@ -1585,12 +1606,12 @@ if [ "$fresh_install" = true ] || [ "$llvm_update" = true ]; then
         exit 1
     }
 
-    llvm_builddir="$llvm_git_dir/build"
-    [ ! -d "$llvm_builddir" ] && mkdir -p "$llvm_builddir"
-    cd "$llvm_builddir"
+    llvm_build_dir="$llvm_git_dir/build"
+    [ ! -d "$llvm_build_dir" ] && mkdir -p "$llvm_build_dir"
+    cd "$llvm_build_dir"
     cmake "$llvm_git_dir/llvm/" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"
-    cd "$llvm_builddir"
-    cmake --build "$llvm_git_dir/build" --target clangd
+    cd "$llvm_build_dir"
+    cmake --build "$llvm_build_dir" --target clangd
     echo "llvm build complete"
 fi
 
