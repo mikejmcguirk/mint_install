@@ -553,6 +553,8 @@ fi
 # fzf
 #####
 
+sudo apt remove fzf
+
 fzf_repo="https://github.com/junegunn/fzf"
 fzf_tag="v0.67.0"
 fzf_update=false
@@ -587,7 +589,9 @@ if [[ "$fresh_install" == true || "$fzf_update" == true ]]; then
         exit 1
     }
 
-    bash install --key-bindings --completion --no-update-rc
+    # Because I had previously neglected to remove the package version, trying --update-rc
+    # again to see if it works properly
+    bash install --key-bindings --completion --update-rc
     cd "$HOME"
 fi
 
