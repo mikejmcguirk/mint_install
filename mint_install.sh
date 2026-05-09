@@ -861,7 +861,7 @@ if [[ "$fresh_install" == true || "$btop_update" == true ]]; then
     fi
 
     sudo wget -P "/opt" "$btop_url"
-    sudo tar xjvf "/opt/$btop_file" -C "/opt/"
+    sudo tar xzf "/opt/$btop_file" -C "/opt/"
     cd $btop_install_dir
     sudo bash "$btop_install_dir/install.sh"
     cd "$HOME"
