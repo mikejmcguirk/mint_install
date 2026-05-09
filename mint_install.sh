@@ -1292,11 +1292,14 @@ if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     git checkout --force "$ghostty_tag"
     # This will send the built file to ~/.local/bin
     rm -rf "$HOME/.cache/zig"
+
+    # I don't know anymore why `-p "$HOME/.local` is present
     # build gtk layer shell since it is not packaged (yet?) with Mint 22.1
     zig build -p "$HOME/.local" -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
     # zig build -p "$HOME/.local" -Doptimize=ReleaseFast
     # zig build -p "$HOME/.local" -Demit-themes=false -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
 
+    # https://github.com/ghostty-org/ghostty/issues/9631
     cd "$HOME/.local/bin"
     BINARY="ghostty"
 
