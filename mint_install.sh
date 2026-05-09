@@ -1286,6 +1286,8 @@ if [ "$ghostty_update" = true ]; then
     git pull
 fi
 
+sudo apt install patchelf
+
 if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     git checkout --force "$ghostty_tag"
     # This will send the built file to ~/.local/bin
