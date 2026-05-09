@@ -1291,8 +1291,8 @@ if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     # This will send the built file to ~/.local/bin
     rm -rf "$HOME/.cache/zig"
     # build gtk layer shell since it is not packaged (yet?) with Mint 22.1
-    zig build -p "$HOME/.local" -Doptimize=ReleaseFast
-    # zig build -p "$HOME/.local" -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
+    zig build -p "$HOME/.local" -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
+    # zig build -p "$HOME/.local" -Doptimize=ReleaseFast
     # zig build -p "$HOME/.local" -Demit-themes=false -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
 
     cd "$HOME"
