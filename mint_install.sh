@@ -405,7 +405,7 @@ fi
 # of the build times.
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.2-13"
+magick_tag="7.1.2-21"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
@@ -645,7 +645,7 @@ fi
 sudo apt remove fzf
 
 fzf_repo="https://github.com/junegunn/fzf"
-fzf_tag="v0.70.0"
+fzf_tag="v0.72.0"
 fzf_update=false
 for arg in "$@"; do
     if [[ "$arg" == "fzf" || "$arg" == "all" ]]; then
@@ -767,7 +767,7 @@ cd "$HOME" || {
 ##############
 
 # https://go.dev/dl/
-go_dl_url="https://go.dev/dl/go1.26.0.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.26.3.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -832,7 +832,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 ######
 
 # https://github.com/aristocratos/btop
-btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.6/btop-x86_64-unknown-linux-musl.tbz"
+btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.7/btop-x86_64-unknown-linux-musl.tar.gz"
 btop_file=$(basename "$btop_url")
 
 btop_update=false
@@ -874,10 +874,6 @@ if [[ "$fresh_install" == true ]]; then
 export PATH="\$PATH:$btop_install_dir/bin"
 EOF
 fi
-
-################
-# Install Lua LS
-################
 
 ###############
 # Lua Ecosystem
@@ -1014,7 +1010,8 @@ sudo luarocks install nlua
 
 # https://github.com/LuaLS/lua-language-server
 # Keep at 3.16.4 because of https://github.com/folke/lazydev.nvim/issues/136
-lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.16.4/lua-language-server-3.16.4-linux-x64.tar.gz"
+# - This should be fixed now, verify
+lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.18.2/lua-language-server-3.18.2-linux-x64.tar.gz"
 lua_ls_file=$(basename "$lua_ls_url")
 
 lua_ls_update=false
@@ -1059,7 +1056,7 @@ fi
 # Less Frequently Updated. Check Monthly #
 ##########################################
 
-# LAST: 2026-03-03
+# LAST: 2026-05-09
 
 ######################
 # Javascript Ecosystem
@@ -1152,7 +1149,7 @@ ghostty_repo="https://github.com/ghostty-org/ghostty"
 ghostty_tag="v1.2.3"
 ghostty_dir="$HOME/.local/bin/ghostty-git"
 
-zig_link="https://ziglang.org/download/0.14.1/zig-x86_64-linux-0.14.1.tar.xz"
+zig_link="https://ziglang.org/download/0.15.2/zig-x86_64-linux-0.15.2.tar.xz"
 ziglang_dir="/opt/ziglang"
 zig_file=$(basename $zig_link)
 zig_filepath=$ziglang_dir/"$zig_file"
@@ -1195,6 +1192,7 @@ if [ "$fresh_install" = true ]; then
 
     # Could be repeats, but here for insurance/documentation
     sudo apt install -y libgtk-4-dev
+    sudo apt install -y libgtk4-layer-shell-dev
     sudo apt install -y libadwaita-1-dev
     sudo apt install -y libxml2-utils
     sudo apt install -y git
@@ -1202,15 +1200,15 @@ if [ "$fresh_install" = true ]; then
     sudo apt install -y pkg-config
     sudo apt install -y gettext
     # ThePrimeagen has these included
-    sudo apt install -y llvm
-    sudo apt install -y lld
-    sudo apt install -y llvm-dev
-    sudo apt install -y liblld-dev
-    sudo apt install -y clang
-    sudo apt install -y libclang-dev
+    # sudo apt install -y llvm
+    # sudo apt install -y lld
+    # sudo apt install -y llvm-dev
+    # sudo apt install -y liblld-dev
+    # sudo apt install -y clang
+    # sudo apt install -y libclang-dev
     # Other stuff that might help
-    sudo apt install -y libegl1-mesa-dev
-    sudo apt install -y libvulkan-dev
+    # sudo apt install -y libegl1-mesa-dev
+    # sudo apt install -y libvulkan-dev
 
     # For blueprint-compiler
     sudo apt install -y ninja-build
@@ -1293,8 +1291,9 @@ if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     # This will send the built file to ~/.local/bin
     rm -rf "$HOME/.cache/zig"
     # build gtk layer shell since it is not packaged (yet?) with Mint 22.1
+    zig build -p "$HOME/.local" -Doptimize=ReleaseFast
     # zig build -p "$HOME/.local" -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
-    zig build -p "$HOME/.local" -Demit-themes=false -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
+    # zig build -p "$HOME/.local" -Demit-themes=false -fno-sys=gtk4-layer-shell -Doptimize=ReleaseFast
 
     cd "$HOME"
 fi
@@ -1508,7 +1507,7 @@ fi
 ##########
 
 tinymist_repo="https://github.com/Myriad-Dreamin/tinymist.git"
-tinymist_tag="v0.14.10"
+tinymist_tag="v0.14.16"
 tinymist_update=false
 for arg in "$@"; do
     if [[ "$arg" == "tinymist" || "$arg" == "all" ]]; then
@@ -1568,7 +1567,7 @@ cd "$HOME" || {
 # Last because clangd takes a while to build
 
 llvm_repo="https://github.com/llvm/llvm-project/"
-llvm_tag="llvmorg-22.1.0"
+llvm_tag="llvmorg-22.1.5"
 llvm_update=false
 for arg in "$@"; do
     if [[ "$arg" == "llvm" || "$arg" == "all" ]]; then
