@@ -1146,7 +1146,7 @@ fi
 # https://github.com/ghostty-org/ghostty/issues/9606
 
 ghostty_repo="https://github.com/ghostty-org/ghostty"
-ghostty_tag="v1.2.3"
+ghostty_tag="v1.3.1"
 ghostty_dir="$HOME/.local/bin/ghostty-git"
 
 zig_link="https://ziglang.org/download/0.15.2/zig-x86_64-linux-0.15.2.tar.xz"
