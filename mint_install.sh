@@ -630,9 +630,11 @@ fi
 ###############
 
 if [[ "$fresh_install" == true ]]; then
-    curl -fsS https://dl.brave.com/install.sh | sh
     sudo apt remove -y firefox
 fi
+
+# Just always do this since the keys can update
+curl -fsS https://dl.brave.com/install.sh | sh
 
 ##########################################
 # Frequently Updated Repos. Check Weekly #
