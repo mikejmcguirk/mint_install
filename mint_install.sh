@@ -1300,16 +1300,15 @@ if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     cd "$HOME/.local/bin"
     BINARY="ghostty"
 
-    echo "→ Current RPATH:"
+    echo "Current RPATH:"
     patchelf --print-rpath "$BINARY"
     CURRENT_RPATH=$(patchelf --print-rpath "$BINARY")
 
     NEW_RPATH=$(echo "$CURRENT_RPATH" | sed "s|\.zig-cache/|${ghostty_dir}/.zig-cache/|g")
-    echo "→ New absolute RPATH:"
+    echo "New absolute RPATH:"
     echo "$NEW_RPATH"
 
     cp -a "$BINARY" "$BINARY.bak.$(date +%Y%m%d-%H%M%S)"
-    # patchelf --force-rpath --set-rpath "$NEW_RPATH" "$BINARY"
     patchelf --set-rpath "$NEW_RPATH" "$BINARY"
 
     echo "New Ghostty rpath:"
