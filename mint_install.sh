@@ -1096,6 +1096,7 @@ nvm alias default lts/*
 npm i -g npm@latest
 
 npm i -g "typescript-language-server"@latest
+npm i -g @vtsls/language-server #This is apparently the preferred version now?
 npm i -g "typescript"@latest
 npm i -g "eslint"@latest
 npm i -g "prettier"@latest
@@ -1516,6 +1517,11 @@ if [[ "$fresh_install" == true ]]; then
     "$cargo_bin" install --locked tree-sitter-cli
     "$cargo_bin" install --features 'pcre2' ripgrep # For Perl Compatible Regex
     sudo apt install -y libssl-dev
+
+    "$cargo_bin" install emmylua_ls
+    "$cargo_bin" install emmylua_check
+    "$cargo_bin" install emmylua_doc_cli
+
     "$cargo_bin" install cargo-update
     "$cargo_bin" install --locked --git https://github.com/Feel-ix-343/markdown-oxide.git markdown-oxide
 else
