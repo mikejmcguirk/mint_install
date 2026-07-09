@@ -511,6 +511,7 @@ EOF
     pipx install ruff
     pipx install python-lsp-server[all]
     pipx inject python-lsp-server pylsp-mypy
+    pipx install ty
 fi
 
 pipx upgrade-all
