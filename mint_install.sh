@@ -1797,6 +1797,71 @@ cd "$HOME" || {
     exit 1
 }
 
+ols_repo="https://github.com/DanielGavin/ols"
+ols_tag="dev-2026-06"
+ols_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "ols" || "$arg" == "all" ]]; then
+        if [[ "$fresh_install" == true ]]; then
+            echo "Cannot do a fresh install and an ols update at the same time"
+            exit 1
+        fi
+
+        ols_update=true
+        echo "Updating ols..."
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$ols_update" != true ]; then
+    echo "Installing ols..."
+fi
+
+ols_git_dir="$HOME/.local/bin/ols"
+[ ! -d "$ols_git_dir" ] && mkdir -p "$ols_git_dir"
+if [[ "$fresh_install" == true ]]; then
+    git clone "$ols_repo" "$ols_git_dir"
+fi
+
+cd "$ols_git_dir" || {
+    echo "Error: Cannot cd to $ols_git_dir"
+    exit 1
+}
+
+if [[ "$ols_update" == true ]]; then
+    git checkout --force master
+    git pull
+fi
+
+if [ "$fresh_install" = true ] || [ "$ols_update" = true ]; then
+    git checkout --force "$ols_tag" || {
+        echo "Error: Cannot checkout $ols_tag"
+        exit 1
+    }
+
+    # Requires the odin binary to be on PATH
+    ./build.sh
+    ./odinfmt.sh
+
+    echo "ols build complete"
+fi
+
+# Make it available in the current shell right now
+# export PATH="$PATH:$HOME/.local/bin/ols"
+# Make it permanent
+# echo 'export PATH="$PATH:$HOME/.local/bin/ols"' >> ~/.bashrc
+
+if [[ "$fresh_install" == true ]]; then
+    cat <<EOF >>"$HOME/.bashrc"
+export PATH="\$PATH:$ols_git_dir"
+EOF
+fi
+
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
+
 #########
 # Wrap Up
 #########
