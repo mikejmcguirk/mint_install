@@ -141,6 +141,7 @@ if [[ "$fresh_install" == true ]]; then
     sudo make
     git config --global credential.helper $libsecret_path/git-credential-libsecret
     cd "$HOME"
+    sudo apt install git-lfs
 fi
 
 ###########
@@ -1655,7 +1656,7 @@ cd "$HOME" || {
 # Last because clangd takes a while to build
 
 llvm_repo="https://github.com/llvm/llvm-project/"
-llvm_tag="llvmorg-22.1.5"
+llvm_tag="llvmorg-22.1.8"
 llvm_update=false
 for arg in "$@"; do
     if [[ "$arg" == "llvm" || "$arg" == "all" ]]; then
@@ -1700,16 +1701,94 @@ if [ "$fresh_install" = true ] || [ "$llvm_update" = true ]; then
     llvm_build_dir="$llvm_git_dir/build"
     [ ! -d "$llvm_build_dir" ] && mkdir -p "$llvm_build_dir"
     cd "$llvm_build_dir"
-    cmake "$llvm_git_dir/llvm/" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"
-    cd "$llvm_build_dir"
-    cmake --build "$llvm_build_dir" --target clangd
+
+    # cmake "$llvm_git_dir/llvm/" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"
+    # Compile non-native architectures for the benefit of Odin
+    cmake ../llvm \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
+        -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM;RISCV;WebAssembly"
+
+    # cd "$llvm_build_dir"
+    # cmake --build "$llvm_build_dir" --target clang clangd llvm-config
+    # ninja -C "$llvm_build_dir" clang clangd llvm-config
+    ninja
     echo "llvm build complete"
 fi
 
 if [[ "$fresh_install" == true ]]; then
     cat <<EOF >>"$HOME/.bashrc"
-
 export PATH="\$PATH:$llvm_git_dir/build/bin"
+EOF
+fi
+
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
+
+odin_repo="https://github.com/odin-lang/Odin"
+odin_tag="dev-2026-07a"
+odin_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "odin" || "$arg" == "all" ]]; then
+        if [[ "$fresh_install" == true ]]; then
+            echo "Cannot do a fresh install and an odin update at the same time"
+            exit 1
+        fi
+        odin_update=true
+        echo "Updating odin..."
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$odin_update" != true ]; then
+    echo "Installing odin..."
+fi
+
+odin_git_dir="$HOME/.local/bin/odin"
+[ ! -d "$odin_git_dir" ] && mkdir -p "$odin_git_dir"
+if [[ "$fresh_install" == true ]]; then
+    git clone "$odin_repo" "$odin_git_dir"
+fi
+
+cd "$odin_git_dir" || {
+    echo "Error: Cannot cd to $odin_git_dir"
+    exit 1
+}
+
+if [[ "$odin_update" == true ]]; then
+    git checkout --force master
+    git pull
+fi
+
+if [ "$fresh_install" = true ] || [ "$odin_update" = true ]; then
+    git checkout --force "$odin_tag" || {
+        echo "Error: Cannot checkout $odin_tag"
+        exit 1
+    }
+
+    git lfs install
+    git lfs pull
+
+    export LLVM_CONFIG="$HOME/.local/bin/llvm/build/bin/llvm-config"
+
+    # Change line build_odin.sh 128 (Linux line) to:
+    # LDFLAGS="$LDFLAGS -lstdc++ -ldl $($LLVM_CONFIG --libs core native aarch64 arm riscv webassembly passes --system-libs --libfiles)"
+    make release-native
+
+    echo "Odin build complete"
+fi
+
+# Make it available in the current shell right now
+# export PATH="$PATH:$HOME/.local/bin/odin"
+# Make it permanent
+# echo 'export PATH="$PATH:$HOME/.local/bin/odin"' >> ~/.bashrc
+
+if [[ "$fresh_install" == true ]]; then
+    cat <<EOF >>"$HOME/.bashrc"
+export PATH="\$PATH:$odin_git_dir"
 EOF
 fi
 
