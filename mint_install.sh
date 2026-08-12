@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # TODO: Audit that this script works on a VM (last: unknown)
+# - Needs to be a flag to skip big installs like LLVM
 # TODO: Check if my version of Mint is still in its support window
 # TODO: Move anything that's install based to build from source based
 # TODO: See about using star tags. Maybe get the current tag in here, then the star tag, and see
@@ -57,266 +58,20 @@ fi
 #     export PATH=/usr/local/bin:$PATH
 # fi
 
-if [[ "$fresh_install" == true ]]; then
-    cat <<EOF >>"$HOME/.bashrc"
-
-alias mint-install="bash \$HOME/mint_install/mint_install.sh"
-EOF
-fi
-
-##################
-# System Hardening
-##################
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y ufw
-    sudo apt remove -y gufw # Mint default
-
-    sudo ufw default deny incoming  # Should be default, but let's be sure
-    sudo ufw default allow outgoing # Also should be default
-    sudo ufw logging on
-    sudo ufw --force enable
-
-    ssh_dir="$HOME/.ssh"
-    [ ! -d "$ssh_dir" ] && mkdir -p "$ssh_dir"
-    chmod 700 "$ssh_dir"
-
-    cat <<'EOF' >"$ssh_dir/config"
-Host *
-ServerAliveInterval 60
-ServerAliveCountMax 30
-EOF
-    chmod 600 "$ssh_dir/config"
-fi
-
-############
-# Apt Basics
-############
-
 sudo apt update
 sudo apt upgrade -y
 
-###########
-# Utilities
-###########
-
 if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y fd-find
-    sudo apt install -y inotify-tools
-    sudo apt install -y vim
-    sudo apt install -y sqlite3
-    sudo apt install -y virtualbox
-
-    # perf would be installed here if needed
-    echo "kernel.perf_event_paranoid = -1" | sudo tee /etc/sysctl.conf
+    # shellcheck disable=SC1091 # shellcheck does not properly resolve $HOME
+    . "$HOME/mint_install/bootstrap.sh"
 fi
-
-###########
-# Dev Tools
-###########
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y shellcheck
-    sudo apt install -y llvm
-fi
-
-#####
-# Git
-#####
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y git-all
-
-    git config --global user.name "Mike J. McGuirk"
-    git config --global user.email "mike.j.mcguirk@gmail.com"
-    git config --global init.defaultBranch master
-
-    # Rebase can do goofy stuff
-    git config --global pull.rebase false
-
-    # libsecret-1-0 already installed
-    sudo apt install -y libsecret-1-dev
-    libsecret_path="/usr/share/doc/git/contrib/credential/libsecret"
-    cd $libsecret_path
-    sudo make
-    git config --global credential.helper $libsecret_path/git-credential-libsecret
-    cd "$HOME"
-    sudo apt install git-lfs
-fi
-
-###########
-# Wireguard
-###########
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y wireguard
-    # resolvconf is a service in Mint Xia
-    sudo apt install -y natpmpc
-fi
-
-##################
-# General Programs
-##################
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y vlc
-    sudo apt install -y hexchat
-    sudo apt install -y libreoffice
-    sudo apt install -y wordnet
-    sudo apt install -y qbittorrent
-    sudo apt install -y kolourpaint
-    sudo apt install -y unrar
-
-    sudo apt remove -y drawing
-    sudo apt remove -y mintupdate
-    sudo apt remove -y timeshift
-fi
-
-##########
-# Redshift
-##########
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y redshift-gtk
-    sudo systemctl disable geoclue
-
-    [ ! -d "$HOME/.config" ] && mkdir -p "$$HOME/.config"
-    redshift_conf_file="$HOME/.config/redshift.conf"
-
-    # lat and lon are set for zero to avoid dox
-    echo "Writing Redshift configuration to $redshift_conf_file..."
-    if cat <<'EOF' >"$redshift_conf_file"; then
-[redshift]
-temp-day=6500
-temp-night=4000
-adjustment-method=randr
-location-provider=manual
-
-[manual]
-lat=00.0000
-lon=00.0000
-EOF
-        echo "Successfully wrote to $redshift_conf_file"
-    else
-        echo "Error: Failed to write to $redshift_conf_file"
-        exit 1
-    fi
-fi
-
-##############
-# Get Dotfiles
-##############
-
-dotfiles_url="https://github.com/mikejmcguirk/dotfiles"
-
-if [[ "$fresh_install" == true ]]; then
-    echo "Pulling in dotfiles"
-    if [ -z "$dotfiles_url" ]; then
-        echo "Error: dotfiles_url must be set."
-        exit 1
-    fi
-
-    dotfile_dir="$HOME/.cfg"
-    [ ! -d "$dotfile_dir" ] && mkdir -p "$dotfile_dir"
-    git clone --bare $dotfiles_url "$dotfile_dir"
-    git --git-dir="$dotfile_dir" --work-tree="$HOME" checkout main --force
-
-    if ! grep -q ".bashrc_custom" "$HOME/.bashrc"; then
-        cat <<'EOF' >>"$HOME/.bashrc"
-
-if [ -f "$HOME/.bashrc_custom" ]; then
-    . "$HOME/.bashrc_custom"
-fi
-EOF
-    fi
-
-    git --git-dir="$dotfile_dir" --work-tree="$HOME" ls-files | grep '\.sh$' | while read -r file; do
-        chmod +x "$HOME/$file"
-    done
-fi
-
-################
-# Window Manager
-################
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y i3
-    sudo apt install -y xautolock
-    sudo apt install -y playerctl # Detect playing media to avoid screen lock
-
-    sudo apt install -y easyeffects
-
-    sudo apt install -y feh
-    sudo apt install -y picom
-
-    sudo apt install -y polybar
-
-    sudo apt install -y mint-themes # Should already be there but just to be sure
-fi
-
-######
-# rofi
-######
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y rofi
-    sudo apt install -y maim  # Use rofi as a wrapper for screenshots
-    sudo apt install -y xsel  # Preferred by Neovim
-    sudo apt install -y xclip # For copying screenshots to clipboard
-    sudo apt install -y jq    # To parse i3 window data for maim
-
-    # We want to be able to reboot and shutdown from Rofi
-    if ! getent group sudo >/dev/null; then
-        echo "Error: The 'sudo' group does not exist on this system"
-        echo "Please create the group or modify the script to use a different group/username"
-        exit 1
-    fi
-
-    reboot_shutdown_file="/etc/sudoers.d/reboot-shutdown"
-    if ! sudo touch "$reboot_shutdown_file"; then
-        echo "Failed to create $reboot_shutdown_file"
-        exit 1
-    fi
-
-    if ! echo "%sudo ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown" | sudo tee "$reboot_shutdown_file" >/dev/null; then
-        echo "Failed to write to $reboot_shutdown_file"
-        sudo rm -f "$reboot_shutdown_file"
-        exit 1
-    fi
-
-    if ! sudo chmod 440 "$reboot_shutdown_file"; then
-        echo "Failed to set permissions on $reboot_shutdown_file"
-        sudo rm -f "$reboot_shutdown_file"
-        exit 1
-    fi
-
-    if ! sudo visudo -c -f "$reboot_shutdown_file"; then
-        echo "Syntax check failed for $reboot_shutdown_file"
-        sudo rm -f "$reboot_shutdown_file"
-        exit 1
-    fi
-
-    cat <<EOF >>"$HOME/.bashrc"
-
-export PATH="\$PATH:/sbin"
-EOF
-
-    echo "Successfully configured $reboot_shutdown_file"
-fi
-
-# NOTE: i3lock-color, magick, and bls are up here on account of install ordering. These repos are
-# rarely updated and should only be checked month.
-# LAST: 2026-03-03
 
 #####################################
 # i3lock-color (betterlockscreen dep)
 #####################################
 
-# NOTE: Would changes to this affect betterlockscreen?
-
 i3lock_repo="https://github.com/Raymo111/i3lock-color"
 i3lock_tag="2.13.c.5"
-
 i3lock_update=false
 for arg in "$@"; do
     if [[ "$arg" == "i3lock" || "$arg" == "all" ]]; then
@@ -334,32 +89,6 @@ fi
 
 if [[ "$fresh_install" == true && "$i3lock_update" != true ]]; then
     echo "Installing i3lock-color..."
-fi
-
-sudo apt remove -y i3lock
-
-# deps
-if [ "$fresh_install" == true ]; then
-    sudo apt install -y autoconf
-    sudo apt install -y gcc
-    sudo apt install -y make
-    sudo apt install -y pkg-config
-    sudo apt install -y libpam0g-dev
-    sudo apt install -y libcairo2-dev
-    sudo apt install -y libfontconfig1-dev
-    sudo apt install -y libxcb-composite0-dev
-    sudo apt install -y libev-dev
-    sudo apt install -y libx11-xcb-dev
-    sudo apt install -y libxcb-xkb-dev
-    sudo apt install -y libxcb-xinerama0-dev
-    sudo apt install -y libxcb-randr0-dev
-    sudo apt install -y libxcb-image0-dev
-    sudo apt install -y libxcb-util0-dev
-    sudo apt install -y libxcb-xrm-dev
-    sudo apt install -y libxkbcommon-dev
-    sudo apt install -y libxkbcommon-x11-dev
-    sudo apt install -y libjpeg-dev
-    sudo apt install -y libgif-dev
 fi
 
 i3_color_git_dir="$HOME/.local/bin/i3lock-color"
@@ -384,10 +113,10 @@ if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
         echo "Error: Cannot checkout $i3lock_tag"
         exit 1
     }
+
     ./install-i3lock-color.sh
     # for betterlockscreen
     mv "$i3_color_build_dir/i3lock" "$i3_color_build_dir/i3lock-color"
-
     cd "$HOME"
 fi
 
@@ -406,48 +135,40 @@ fi
 # of the build times.
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.2-21"
+magick_tag="7.1.2-29"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
         magick_update=true
         echo "Updating ImageMagick..."
-
         break
     fi
 done
 
-if [[ "$fresh_install" == true && "$magick_update" == true ]]; then
-    echo "Cannot fresh install and update magick"
-    exit 1
-fi
+[[ "$fresh_install" == true ]] && magick_update=true
 
 magick_git_dir="$HOME/.local/bin/magick"
-if [[ "$fresh_install" == true || "$magick_update" == true ]]; then
-    [ ! -d "$magick_git_dir" ] && mkdir -p "$magick_git_dir"
+if [[ "$magick_update" == true ]]; then
+    mkdir -p "$magick_git_dir"
     cd "$magick_git_dir" || {
         echo "Error: Cannot cd to $magick_git_dir"
         exit 1
     }
-fi
 
-if [[ "$fresh_install" == true ]]; then
-    git clone $magick_repo "$magick_git_dir"
-elif [[ "$magick_update" == true ]]; then
-    git checkout --force main
-    git pull
-fi
+    if [[ ! -d .git ]]; then
+        git clone --depth 1 --branch "$magick_tag" "$magick_repo" .
+    else
+        git fetch --tags --force origin
+        git checkout --force "$magick_tag" || {
+            echo "Error: Cannot checkout $magick_tag"
+            exit 1
+        }
+    fi
 
-if [[ "$fresh_install" == true || "$magick_update" == true ]]; then
-    git checkout --force "$magick_tag" || {
-        echo "Error: Cannot checkout $magick_tag"
-        exit 1
-    }
     ./configure
-    make
+    make -j"$(nproc)"
     sudo make install
     sudo ldconfig /usr/local/lib
-
     cd "$HOME"
 fi
 
@@ -473,13 +194,6 @@ if [[ "$fresh_install" == true && "$bls_update" != true ]]; then
     echo "Installing betterlockscreen..."
 fi
 
-# deps
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y feh # for wallpaper
-    sudo apt install -y bc
-    sudo apt install -y xautolock
-fi
-
 # Note: The install script will fail if it fails to find any of the deps, including
 # i3lock-color and ImageMagick
 if [[ "$fresh_install" == true || "$bls_update" == true ]]; then
@@ -493,27 +207,6 @@ fi
 ##################
 # Python Ecosystem
 ##################
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install -y python3-full
-    sudo apt install -y python3-pip
-    sudo apt install -y pipx
-
-    pipx ensurepath # Adds ~/.local/bin to path
-    # Add pipx completions
-    cat <<'EOF' >>"$HOME/.bashrc"
-
-eval "$(register-python-argcomplete pipx)"
-EOF
-
-    pipx install nvitop
-    # pipx install beautysh
-    pipx runpip beautysh install setuptools
-    pipx install ruff
-    pipx install python-lsp-server[all]
-    pipx inject python-lsp-server pylsp-mypy
-    pipx install ty
-fi
 
 pipx upgrade-all
 
@@ -649,7 +342,7 @@ curl -fsS https://dl.brave.com/install.sh | sh
 sudo apt remove fzf
 
 fzf_repo="https://github.com/junegunn/fzf"
-fzf_tag="v0.72.0"
+fzf_tag="v0.74.2"
 fzf_update=false
 for arg in "$@"; do
     if [[ "$arg" == "fzf" || "$arg" == "all" ]]; then
@@ -771,7 +464,7 @@ cd "$HOME" || {
 ##############
 
 # https://go.dev/dl/
-go_dl_url="https://go.dev/dl/go1.26.3.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.26.5.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -944,131 +637,13 @@ cd "$HOME" || {
     exit 1
 }
 
-# NOTE: Check if the 3.13.0 tag is part of the repo first.
-# TODO: How does 3.13.0 show when it's not part of the repo?
-
-luarocks_repo="https://github.com/luarocks/luarocks"
-luarocks_tag="v3.12.2"
-luarocks_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "luarocks" || "$arg" == "all" ]]; then
-        if [[ "$fresh_install" == true ]]; then
-            echo "Cannot do a fresh install and a luarocks update at the same time"
-            exit 1
-        fi
-
-        luarocks_update=true
-        echo "Updating luarocks..."
-        break
-    fi
-done
-
-if [ "$fresh_install" = true ] && [ "$luarocks_update" != true ]; then
-    echo "Installing luarocks..."
-fi
-
-luarocks_git_dir="$HOME/.local/bin/luarocks"
-[ ! -d "$luarocks_git_dir" ] && mkdir -p "$luarocks_git_dir"
-
-if [[ "$fresh_install" == true ]]; then
-    git clone $luarocks_repo "$luarocks_git_dir"
-fi
-
-cd "$luarocks_git_dir" || {
-    echo "Error: Cannot cd to $luarocks_git_dir"
-    exit 1
-}
-
-if [[ "$luarocks_update" == true ]]; then
-    git checkout --force main
-    git pull
-fi
-
-if [ "$fresh_install" = true ] || [ "$luarocks_update" = true ]; then
-    git checkout --force "$luarocks_tag" || {
-        echo "Error: Cannot checkout $luarocks_tag"
-        exit 1
-    }
-
-    # Detects LuaJIT as Lua 5.1
-    ./configure --with-lua-include=/usr/local/include
-    make
-    sudo make install
-
-    echo "luarocks build complete"
-fi
-
-cd "$HOME" || {
-    echo "Error: Cannot cd to $HOME"
-    exit 1
-}
-
-if [[ "$fresh_install" == true ]]; then
-    # To locate the lua.h file
-    sudo luarocks config variables.LUA_INCDIR "/usr/local/include/luajit-2.1"
-fi
-
-# TODO: Not totally sure if this actually updates
-sudo luarocks install busted
-sudo luarocks install nlua
-
-# https://github.com/LuaLS/lua-language-server
-# Keep at 3.16.4 because of https://github.com/folke/lazydev.nvim/issues/136
-# - This should be fixed now, verify
-lua_ls_url="https://github.com/LuaLS/lua-language-server/releases/download/3.18.2/lua-language-server-3.18.2-linux-x64.tar.gz"
-lua_ls_file=$(basename "$lua_ls_url")
-
-lua_ls_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "lua_ls" || "$arg" == "all" ]]; then
-        lua_ls_update=true
-        echo "Updating Lua LS..."
-
-        break
-    fi
-done
-
-lua_ls_install_dir="$HOME/.local/bin/lua_ls"
-
-if [[ "$fresh_install" == true || "$lua_ls_update" == true ]]; then
-    if [ -z "$lua_ls_url" ] || [ -z "$lua_ls_file" ]; then
-        echo "Error: lua_ls_url and lua_ls_file must be set"
-        exit 1
-    fi
-
-    if [ -d "$lua_ls_install_dir" ]; then
-        echo "Removing existing lua_ls installation at $lua_ls_install_dir..."
-        rm -rf "$lua_ls_install_dir"
-    else
-        echo "No existing lua_ls installation found at $lua_ls_install_dir"
-    fi
-
-    # Files are in the top level of the tar
-    wget -P "$lua_ls_install_dir" $lua_ls_url
-    tar xzf "$lua_ls_install_dir/$lua_ls_file" -C "$lua_ls_install_dir"
-    rm "$lua_ls_install_dir/$lua_ls_file"
-fi
-
-if [[ "$fresh_install" == true ]]; then
-    cat <<EOF >>"$HOME/.bashrc"
-
-export PATH="\$PATH:$lua_ls_install_dir/bin"
-EOF
-fi
-
-##########################################
-# Less Frequently Updated. Check Monthly #
-##########################################
-
-# LAST: 2026-05-09
-
 ######################
 # Javascript Ecosystem
 ######################
 
 # https://github.com/nvm-sh/nvm
 # Check that the install cmd is up to date as well
-nvm_install_url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh"
+nvm_install_url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh"
 nvm_update=false
 for arg in "$@"; do
     if [[ "$arg" == "nvm" || "$arg" == "all" ]]; then
@@ -1111,7 +686,7 @@ npm i -g "bash-language-server"@latest
 
 # https://www.nerdfonts.com/font-downloads
 # Cousine version: 1.211
-nerd_font_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Cousine.zip"
+nerd_font_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.0/Cousine.zip"
 nerd_font_filename=$(basename "$nerd_font_url")
 
 nerd_font_update=false
@@ -1329,16 +904,8 @@ fi
 # Tmux
 ######
 
-if [ "$fresh_install" = true ]; then
-    sudo apt install -y bison
-    sudo apt install -y libncurses-dev
-    sudo apt install -y libevent-dev
-    sudo apt install -y automake
-    sudo apt install -y autoconf
-fi
-
 tmux_url="https://github.com/tmux/tmux"
-tmux_branch="3.6a"
+tmux_branch="3.7b"
 tpm_repo="https://github.com/tmux-plugins/tpm"
 tmux_power_repo="https://github.com/wfxr/tmux-power"
 
@@ -1475,15 +1042,15 @@ fi
 # Apt Cleanup
 #############
 
+# Cleanup apt before updating Rust and anything LLVM related. Because the build times are so
+# long, the sudo-session might time out.
+
 sudo apt autoremove -y
 sudo apt autoclean -y
 
 ################
 # Rust Ecosystem
 ################
-
-# Rust is added last because it takes the longest (insert Rust comp times meme here)
-# If you do this in the middle of the install, the sudo "session" might time out
 
 # Rust URL
 # Check curl cmd as well
@@ -1539,7 +1106,7 @@ fi
 ##########
 
 tinymist_repo="https://github.com/Myriad-Dreamin/tinymist.git"
-tinymist_tag="v0.14.16"
+tinymist_tag="v0.15.2"
 tinymist_update=false
 for arg in "$@"; do
     if [[ "$arg" == "tinymist" || "$arg" == "all" ]]; then
@@ -1637,8 +1204,10 @@ if [ "$fresh_install" = true ] || [ "$emmylua_ls_update" = true ]; then
         exit 1
     }
 
-    # TODO: YOu need to do every other module individually as well
     "$cargo_bin" install --path crates/emmylua_ls --locked emmylua_ls
+    "$cargo_bin" install --path crates/emmylua_check --locked emmylua_check
+    "$cargo_bin" install --path crates/emmylua_formatter --locked emmylua_formatter
+    "$cargo_bin" install --path crates/emmylua_doc_cli --locked emmylua_doc_cli
     echo "emmylua_ls build complete"
 fi
 
@@ -1728,11 +1297,16 @@ cd "$HOME" || {
     exit 1
 }
 
+##################
+# Odin Ecosystem #
+##################
+
 odin_repo="https://github.com/odin-lang/Odin"
 odin_tag="dev-2026-07a"
 odin_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "odin" || "$arg" == "all" ]]; then
+    # TODO: Restore functionality on all. Issue is the hack for architecture flags
+    if [[ "$arg" == "odin" ]]; then
         if [[ "$fresh_install" == true ]]; then
             echo "Cannot do a fresh install and an odin update at the same time"
             exit 1
@@ -1801,7 +1375,8 @@ ols_repo="https://github.com/DanielGavin/ols"
 ols_tag="dev-2026-06"
 ols_update=false
 for arg in "$@"; do
-    if [[ "$arg" == "ols" || "$arg" == "all" ]]; then
+    # TODO: Restore functionality on all once main Odin install is fixed.
+    if [[ "$arg" == "ols" ]]; then
         if [[ "$fresh_install" == true ]]; then
             echo "Cannot do a fresh install and an ols update at the same time"
             exit 1
@@ -1874,5 +1449,6 @@ what_happened="Update"
 if [[ "$fresh_install" == true ]]; then
     what_happened="Install"
 fi
+
 echo "$what_happened script complete"
 echo "Reboot to ensure all changes take effect"
