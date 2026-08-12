@@ -289,3 +289,9 @@ sudo apt install -y libncurses-dev
 sudo apt install -y libevent-dev
 sudo apt install -y automake
 sudo apt install -y autoconf
+
+##############
+# Other Deps #
+##############
+
+sudo apt install -y libssl-dev

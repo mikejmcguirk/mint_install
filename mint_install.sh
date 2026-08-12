@@ -1081,15 +1081,15 @@ if [[ "$fresh_install" == true ]]; then
     "$cargo_bin" install tokei
     "$cargo_bin" install --locked typst-cli
     "$cargo_bin" install typstyle --locked
+    "$cargo_bin" install --git https://github.com/Myriad-Dreamin/tinymist --locked tinymist-cli
     "$cargo_bin" install flamegraph
     "$cargo_bin" install vimcats --features=cli
     "$cargo_bin" install --locked tree-sitter-cli
     "$cargo_bin" install --features 'pcre2' ripgrep # For Perl Compatible Regex
-    sudo apt install -y libssl-dev
 
-    # "$cargo_bin" install emmylua_ls
-    # "$cargo_bin" install emmylua_check
-    # "$cargo_bin" install emmylua_doc_cli
+    "$cargo_bin" install emmylua_ls
+    "$cargo_bin" install emmylua_check
+    "$cargo_bin" install emmylua_doc_cli
 
     "$cargo_bin" install cargo-update
     "$cargo_bin" install --locked --git https://github.com/Feel-ix-343/markdown-oxide.git markdown-oxide
@@ -1100,121 +1100,6 @@ fi
 if [[ "$fresh_install" == true ]]; then
     sudo apt install build-essential libreadline-dev unzip
 fi
-
-##########
-# Tinymist
-##########
-
-tinymist_repo="https://github.com/Myriad-Dreamin/tinymist.git"
-tinymist_tag="v0.15.2"
-tinymist_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "tinymist" || "$arg" == "all" ]]; then
-        if [[ "$fresh_install" == true ]]; then
-            echo "Cannot do a fresh install and a tinymist update at the same time"
-            exit 1
-        fi
-
-        tinymist_update=true
-        echo "Updating tinymist..."
-        break
-    fi
-done
-
-if [ "$fresh_install" = true ] && [ "$tinymist_update" != true ]; then
-    echo "Installing tinymist..."
-fi
-
-tinymist_git_dir="$HOME/.local/bin/tinymist"
-[ ! -d "$tinymist_git_dir" ] && mkdir -p "$tinymist_git_dir"
-
-if [[ "$fresh_install" == true ]]; then
-    git clone $tinymist_repo "$tinymist_git_dir"
-fi
-
-cd "$tinymist_git_dir" || {
-    echo "Error: Cannot cd to $tinymist_git_dir"
-    exit 1
-}
-
-if [[ "$tinymist_update" == true ]]; then
-    git checkout --force main
-    git pull
-fi
-
-if [ "$fresh_install" = true ] || [ "$tinymist_update" = true ]; then
-    git checkout --force "$tinymist_tag" || {
-        echo "Error: Cannot checkout $tinymist_tag"
-        exit 1
-    }
-
-    "$cargo_bin" install --path crates/tinymist-cli --locked tinymist-cli
-    echo "tinymist build complete"
-fi
-
-cd "$HOME" || {
-    echo "Error: Cannot cd to $HOME"
-    exit 1
-}
-
-#########
-# Emmylua
-#########
-
-emmylua_ls_repo="https://github.com/EmmyLuaLs/emmylua-analyzer-rust"
-emmylua_ls_tag="main"
-emmylua_ls_update=false
-for arg in "$@"; do
-    if [[ "$arg" == "emmylua_ls" || "$arg" == "all" ]]; then
-        if [[ "$fresh_install" == true ]]; then
-            echo "Cannot do a fresh install and a emmylua_ls update at the same time"
-            exit 1
-        fi
-
-        emmylua_ls_update=true
-        echo "Updating emmylua_ls..."
-        break
-    fi
-done
-
-if [ "$fresh_install" = true ] && [ "$emmylua_ls_update" != true ]; then
-    echo "Installing emmylua_ls..."
-fi
-
-emmylua_ls_git_dir="$HOME/.local/bin/emmylua_ls"
-[ ! -d "$emmylua_ls_git_dir" ] && mkdir -p "$emmylua_ls_git_dir"
-
-if [[ "$fresh_install" == true ]]; then
-    git clone $emmylua_ls_repo "$emmylua_ls_git_dir"
-fi
-
-cd "$emmylua_ls_git_dir" || {
-    echo "Error: Cannot cd to $emmylua_ls_git_dir"
-    exit 1
-}
-
-if [[ "$emmylua_ls_update" == true ]]; then
-    git checkout --force main
-    git pull
-fi
-
-if [ "$fresh_install" = true ] || [ "$emmylua_ls_update" = true ]; then
-    git checkout --force "$emmylua_ls_tag" || {
-        echo "Error: Cannot checkout $emmylua_ls_tag"
-        exit 1
-    }
-
-    "$cargo_bin" install --path crates/emmylua_ls --locked emmylua_ls
-    "$cargo_bin" install --path crates/emmylua_check --locked emmylua_check
-    "$cargo_bin" install --path crates/emmylua_formatter --locked emmylua_formatter
-    "$cargo_bin" install --path crates/emmylua_doc_cli --locked emmylua_doc_cli
-    echo "emmylua_ls build complete"
-fi
-
-cd "$HOME" || {
-    echo "Error: Cannot cd to $HOME"
-    exit 1
-}
 
 #############
 # C Ecosystem
