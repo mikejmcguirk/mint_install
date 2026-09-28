@@ -1110,7 +1110,7 @@ fi
 # Last because clangd takes a while to build
 
 llvm_repo="https://github.com/llvm/llvm-project/"
-llvm_tag="llvmorg-22.1.8"
+llvm_tag="llvmorg-23.1.2"
 llvm_update=false
 for arg in "$@"; do
     if [[ "$arg" == "llvm" || "$arg" == "all" ]]; then
@@ -1186,16 +1186,17 @@ cd "$HOME" || {
 # Odin Ecosystem #
 ##################
 
-odin_repo="https://github.com/odin-lang/Odin"
-odin_tag="dev-2026-07a"
+odin_tag="dev-2026-09"
+odin_url="https://github.com/odin-lang/Odin/releases/download/${odin_tag}/odin-linux-amd64-${odin_tag}.tar.gz"
+odin_tar=$(basename "$odin_url")
 odin_update=false
 for arg in "$@"; do
-    # TODO: Restore functionality on all. Issue is the hack for architecture flags
     if [[ "$arg" == "odin" ]]; then
         if [[ "$fresh_install" == true ]]; then
             echo "Cannot do a fresh install and an odin update at the same time"
             exit 1
         fi
+
         odin_update=true
         echo "Updating odin..."
         break
@@ -1206,61 +1207,53 @@ if [ "$fresh_install" = true ] && [ "$odin_update" != true ]; then
     echo "Installing odin..."
 fi
 
-odin_git_dir="$HOME/.local/bin/odin"
-[ ! -d "$odin_git_dir" ] && mkdir -p "$odin_git_dir"
-if [[ "$fresh_install" == true ]]; then
-    git clone "$odin_repo" "$odin_git_dir"
-fi
-
-cd "$odin_git_dir" || {
-    echo "Error: Cannot cd to $odin_git_dir"
-    exit 1
-}
-
-if [[ "$odin_update" == true ]]; then
-    git checkout --force master
-    git pull
-fi
+odin_dir="$HOME/.local/bin/odin"
 
 if [ "$fresh_install" = true ] || [ "$odin_update" = true ]; then
-    git checkout --force "$odin_tag" || {
-        echo "Error: Cannot checkout $odin_tag"
+    if [ -z "$odin_url" ] || [ -z "$odin_tar" ]; then
+        echo "Error: odin_url and odin_tar must be set."
         exit 1
-    }
+    fi
 
-    git lfs install
-    git lfs pull
+    if [ -d "$odin_dir" ]; then
+        echo "Removing existing Odin installation at $odin_dir..."
+        rm -rf "$odin_dir"
+    else
+        echo "No existing Odin installation found at $odin_dir"
+    fi
 
-    export LLVM_CONFIG="$HOME/.local/bin/llvm/build/bin/llvm-config"
+    odin_dl_dir="$HOME/.local"
+    mkdir -p "$odin_dir"
+    wget -P "$odin_dl_dir" "$odin_url"
+    tar -xzf "$odin_dl_dir/$odin_tar" -C "$odin_dir" --strip-components=1
+    rm "$odin_dl_dir/$odin_tar"
 
-    # Change line build_odin.sh 128 (Linux line) to:
-    # LDFLAGS="$LDFLAGS -lstdc++ -ldl $($LLVM_CONFIG --libs core native aarch64 arm riscv webassembly passes --system-libs --libfiles)"
-    make release-native
+    if [[ ! -x "$odin_dir/odin" ]]; then
+        echo "Error: Odin binary missing after extract at $odin_dir/odin"
+        exit 1
+    fi
 
-    echo "Odin build complete"
+    echo "Odin install complete"
 fi
 
 # Make it available in the current shell right now
-# export PATH="$PATH:$HOME/.local/bin/odin"
-# Make it permanent
-# echo 'export PATH="$PATH:$HOME/.local/bin/odin"' >> ~/.bashrc
+export PATH="$PATH:$odin_dir"
 
-if [[ "$fresh_install" == true ]]; then
+# Persist PATH if missing (fresh install or update)
+if ! grep -qsF "export PATH=\"\$PATH:$odin_dir\"" "$HOME/.bashrc"; then
     cat <<EOF >>"$HOME/.bashrc"
-export PATH="\$PATH:$odin_git_dir"
+export PATH="\$PATH:$odin_dir"
 EOF
 fi
+# TODO: Use this grep pattern everywhere.
 
 cd "$HOME" || {
     echo "Error: Cannot cd to $HOME"
     exit 1
 }
 
-ols_repo="https://github.com/DanielGavin/ols"
-ols_tag="dev-2026-06"
 ols_update=false
 for arg in "$@"; do
-    # TODO: Restore functionality on all once main Odin install is fixed.
     if [[ "$arg" == "ols" ]]; then
         if [[ "$fresh_install" == true ]]; then
             echo "Cannot do a fresh install and an ols update at the same time"
@@ -1277,43 +1270,67 @@ if [ "$fresh_install" = true ] && [ "$ols_update" != true ]; then
     echo "Installing ols..."
 fi
 
-ols_git_dir="$HOME/.local/bin/ols"
-[ ! -d "$ols_git_dir" ] && mkdir -p "$ols_git_dir"
-if [[ "$fresh_install" == true ]]; then
-    git clone "$ols_repo" "$ols_git_dir"
-fi
-
-cd "$ols_git_dir" || {
-    echo "Error: Cannot cd to $ols_git_dir"
-    exit 1
-}
-
-if [[ "$ols_update" == true ]]; then
-    git checkout --force master
-    git pull
-fi
+ols_dir="$HOME/.local/bin/ols"
+ols_asset="ols-x86_64-unknown-linux-gnu.zip"
 
 if [ "$fresh_install" = true ] || [ "$ols_update" = true ]; then
-    git checkout --force "$ols_tag" || {
-        echo "Error: Cannot checkout $ols_tag"
+    if ! command -v jq >/dev/null 2>&1; then
+        echo "Error: jq is required to resolve the latest ols release"
         exit 1
-    }
+    fi
 
-    # Requires the odin binary to be on PATH
-    ./build.sh
-    ./odinfmt.sh
+    ols_tag=$(curl -fsSL "https://api.github.com/repos/DanielGavin/ols/releases/latest" | jq -r .tag_name)
+    if [ -z "$ols_tag" ] || [ "$ols_tag" = "null" ]; then
+        echo "Error: Failed to resolve latest ols release tag"
+        exit 1
+    fi
 
-    echo "ols build complete"
+    ols_url="https://github.com/DanielGavin/ols/releases/download/${ols_tag}/${ols_asset}"
+    ols_zip=$(basename "$ols_url")
+
+    echo "Installing ols ${ols_tag} from $ols_url..."
+
+    if [ -d "$ols_dir" ]; then
+        echo "Removing existing ols installation at $ols_dir..."
+        rm -rf "$ols_dir"
+    else
+        echo "No existing ols installation found at $ols_dir"
+    fi
+
+    ols_dl_dir="$HOME/.local"
+    mkdir -p "$ols_dir"
+    wget -P "$ols_dl_dir" "$ols_url"
+    unzip -o "$ols_dl_dir/$ols_zip" -d "$ols_dir"
+    rm "$ols_dl_dir/$ols_zip"
+
+    # Release binaries are platform-suffixed; rename for PATH usage
+    mv "$ols_dir/ols-x86_64-unknown-linux-gnu" "$ols_dir/ols"
+    mv "$ols_dir/odinfmt-x86_64-unknown-linux-gnu" "$ols_dir/odinfmt"
+    chmod +x "$ols_dir/ols" "$ols_dir/odinfmt"
+
+    if [[ ! -x "$ols_dir/ols" ]]; then
+        echo "Error: ols binary missing after extract at $ols_dir/ols"
+        exit 1
+    fi
+    if [[ ! -x "$ols_dir/odinfmt" ]]; then
+        echo "Error: odinfmt binary missing after extract at $ols_dir/odinfmt"
+        exit 1
+    fi
+    if [[ ! -d "$ols_dir/builtin" ]]; then
+        echo "Error: ols builtin folder missing after extract at $ols_dir/builtin"
+        exit 1
+    fi
+
+    echo "ols install complete"
 fi
 
 # Make it available in the current shell right now
-# export PATH="$PATH:$HOME/.local/bin/ols"
-# Make it permanent
-# echo 'export PATH="$PATH:$HOME/.local/bin/ols"' >> ~/.bashrc
+export PATH="$PATH:$ols_dir"
 
-if [[ "$fresh_install" == true ]]; then
+# Persist PATH if missing (fresh install or update)
+if ! grep -qsF "export PATH=\"\$PATH:$ols_dir\"" "$HOME/.bashrc"; then
     cat <<EOF >>"$HOME/.bashrc"
-export PATH="\$PATH:$ols_git_dir"
+export PATH="\$PATH:$ols_dir"
 EOF
 fi
 
