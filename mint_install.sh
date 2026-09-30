@@ -672,9 +672,7 @@ nvm alias default lts/*
 
 npm i -g npm@latest
 
-npm i -g "typescript-language-server"@latest
 npm i -g @vtsls/language-server #This is apparently the preferred version now?
-npm i -g "typescript"@latest
 npm i -g "eslint"@latest
 npm i -g "prettier"@latest
 npm i -g "vscode-langservers-extracted"@latest
@@ -1047,6 +1045,215 @@ fi
 
 sudo apt autoremove -y
 sudo apt autoclean -y
+
+#########
+# Web Dev
+#########
+
+superhtml_tag="v0.7.0"
+superhtml_asset="x86_64-linux-musl.tar.xz"
+superhtml_url="https://github.com/kristoff-it/superhtml/releases/download/${superhtml_tag}/${superhtml_asset}"
+superhtml_tar=$(basename "$superhtml_url")
+superhtml_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "superhtml" ]]; then
+        if [[ "$fresh_install" == true ]]; then
+            echo "Cannot do a fresh install and a superhtml update at the same time"
+            exit 1
+        fi
+
+        superhtml_update=true
+        echo "Updating superhtml..."
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$superhtml_update" != true ]; then
+    echo "Installing superhtml..."
+fi
+
+superhtml_dir="$HOME/.local/bin/superhtml"
+
+if [ "$fresh_install" = true ] || [ "$superhtml_update" = true ]; then
+    if [ -z "$superhtml_url" ] || [ -z "$superhtml_tar" ]; then
+        echo "Error: superhtml_url and superhtml_tar must be set."
+        exit 1
+    fi
+
+    if [ -d "$superhtml_dir" ]; then
+        echo "Removing existing superhtml installation at $superhtml_dir..."
+        rm -rf "$superhtml_dir"
+    else
+        echo "No existing superhtml installation found at $superhtml_dir"
+    fi
+
+    superhtml_dl_dir="$HOME/.local"
+    mkdir -p "$superhtml_dir"
+    wget -P "$superhtml_dl_dir" "$superhtml_url"
+    # Archive is the binary itself, not a top-level directory
+    tar -xJf "$superhtml_dl_dir/$superhtml_tar" -C "$superhtml_dir"
+    rm "$superhtml_dl_dir/$superhtml_tar"
+    chmod +x "$superhtml_dir/superhtml"
+
+    if [[ ! -x "$superhtml_dir/superhtml" ]]; then
+        echo "Error: superhtml binary missing after extract at $superhtml_dir/superhtml"
+        exit 1
+    fi
+
+    echo "superhtml install complete"
+fi
+
+# Make it available in the current shell right now
+export PATH="$PATH:$superhtml_dir"
+
+# Persist PATH if missing (fresh install or update)
+if ! grep -qsF "export PATH=\"\$PATH:$superhtml_dir\"" "$HOME/.bashrc"; then
+    cat <<EOF >>"$HOME/.bashrc"
+export PATH="\$PATH:$superhtml_dir"
+EOF
+fi
+
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
+
+tsc_tag="v7.0.2"
+tsc_asset="typescript-linux-x64.tgz"
+tsc_url="https://github.com/microsoft/TypeScript/releases/download/${tsc_tag}/${tsc_asset}"
+tsc_tar=$(basename "$tsc_url")
+tsc_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "tsc" ]]; then
+        if [[ "$fresh_install" == true ]]; then
+            echo "Cannot do a fresh install and a tsc update at the same time"
+            exit 1
+        fi
+
+        tsc_update=true
+        echo "Updating tsc..."
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$tsc_update" != true ]; then
+    echo "Installing tsc..."
+fi
+
+tsc_dir="$HOME/.local/bin/tsc"
+
+if [ "$fresh_install" = true ] || [ "$tsc_update" = true ]; then
+    if [ -z "$tsc_url" ] || [ -z "$tsc_tar" ]; then
+        echo "Error: tsc_url and tsc_tar must be set."
+        exit 1
+    fi
+
+    if [ -d "$tsc_dir" ]; then
+        echo "Removing existing tsc installation at $tsc_dir..."
+        rm -rf "$tsc_dir"
+    else
+        echo "No existing tsc installation found at $tsc_dir"
+    fi
+
+    tsc_dl_dir="$HOME/.local"
+    mkdir -p "$tsc_dir"
+    wget -P "$tsc_dl_dir" "$tsc_url"
+    # Archive root is package/; tsc lives in lib/ beside the bundled lib.*.d.ts files
+    tar -xzf "$tsc_dl_dir/$tsc_tar" -C "$tsc_dir" --strip-components=1
+    rm "$tsc_dl_dir/$tsc_tar"
+    chmod +x "$tsc_dir/lib/tsc"
+
+    if [[ ! -x "$tsc_dir/lib/tsc" ]]; then
+        echo "Error: tsc binary missing after extract at $tsc_dir/lib/tsc"
+        exit 1
+    fi
+
+    echo "tsc install complete"
+fi
+
+# Binary must stay in lib/ so it can find the bundled lib.*.d.ts files
+tsc_bin_dir="$tsc_dir/lib"
+
+# Prepend. nvm puts its bin dir ahead of later appends, and that dir's tsc is the npm package.
+export PATH="$tsc_bin_dir:$PATH"
+
+# Persist PATH if missing (fresh install or update). Replace an older append so it actually wins.
+if grep -qsF "export PATH=\"\$PATH:$tsc_bin_dir\"" "$HOME/.bashrc"; then
+    sed -i "s|export PATH=\"\$PATH:$tsc_bin_dir\"|export PATH=\"$tsc_bin_dir:\$PATH\"|" "$HOME/.bashrc"
+elif ! grep -qsF "export PATH=\"$tsc_bin_dir:\$PATH\"" "$HOME/.bashrc"; then
+    cat <<EOF >>"$HOME/.bashrc"
+export PATH="$tsc_bin_dir:\$PATH"
+EOF
+fi
+
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
+
+biome_tag="@biomejs/biome@2.5.14"
+biome_asset="biome-linux-x64"
+biome_url="https://github.com/biomejs/biome/releases/download/${biome_tag}/${biome_asset}"
+biome_update=false
+for arg in "$@"; do
+    if [[ "$arg" == "biome" ]]; then
+        if [[ "$fresh_install" == true ]]; then
+            echo "Cannot do a fresh install and a biome update at the same time"
+            exit 1
+        fi
+
+        biome_update=true
+        echo "Updating biome..."
+        break
+    fi
+done
+
+if [ "$fresh_install" = true ] && [ "$biome_update" != true ]; then
+    echo "Installing biome..."
+fi
+
+biome_dir="$HOME/.local/bin/biome"
+
+if [ "$fresh_install" = true ] || [ "$biome_update" = true ]; then
+    if [ -z "$biome_url" ] || [ -z "$biome_asset" ]; then
+        echo "Error: biome_url and biome_asset must be set."
+        exit 1
+    fi
+
+    if [ -d "$biome_dir" ]; then
+        echo "Removing existing biome installation at $biome_dir..."
+        rm -rf "$biome_dir"
+    else
+        echo "No existing biome installation found at $biome_dir"
+    fi
+
+    mkdir -p "$biome_dir"
+    # Release asset is the binary itself, not an archive
+    wget -O "$biome_dir/biome" "$biome_url"
+    chmod +x "$biome_dir/biome"
+
+    if [[ ! -x "$biome_dir/biome" ]]; then
+        echo "Error: biome binary missing after download at $biome_dir/biome"
+        exit 1
+    fi
+
+    echo "biome install complete"
+fi
+
+# Make it available in the current shell right now
+export PATH="$PATH:$biome_dir"
+
+# Persist PATH if missing (fresh install or update)
+if ! grep -qsF "export PATH=\"\$PATH:$biome_dir\"" "$HOME/.bashrc"; then
+    cat <<EOF >>"$HOME/.bashrc"
+export PATH="\$PATH:$biome_dir"
+EOF
+fi
+
+cd "$HOME" || {
+    echo "Error: Cannot cd to $HOME"
+    exit 1
+}
 
 ################
 # Rust Ecosystem
