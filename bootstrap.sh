@@ -214,10 +214,12 @@ if ! sudo visudo -c -f "$reboot_shutdown_file"; then
     exit 1
 fi
 
-cat <<EOF >>"$HOME/.bashrc"
+if ! grep -qsF 'export PATH="$PATH:/sbin"' "$HOME/.bashrc"; then
+    cat <<'EOF' >>"$HOME/.bashrc"
 
-export PATH="\$PATH:/sbin"
+export PATH="$PATH:/sbin"
 EOF
+fi
 
 echo "Successfully configured $reboot_shutdown_file"
 

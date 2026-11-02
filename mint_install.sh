@@ -541,7 +541,8 @@ export PATH=$PATH:$go_install_bin
 export GOPATH=$(go env GOPATH)
 export PATH=$PATH:$GOPATH/bin
 
-if [[ "$fresh_install" == true ]]; then
+if ! grep -qsF "export PATH=\$PATH:$go_install_bin" "$HOME/.bashrc" ||
+    ! grep -qsF 'export PATH=$PATH:$GOPATH/bin' "$HOME/.bashrc"; then
     echo "Adding Go paths to $HOME/.bashrc..."
     cat <<EOF >>"$HOME/.bashrc"
 
@@ -599,9 +600,8 @@ if [[ "$fresh_install" == true || "$btop_update" == true ]]; then
     sudo rm "/opt/$btop_file"
 fi
 
-if [[ "$fresh_install" == true ]]; then
+if ! grep -qsF "export PATH=\"\$PATH:$btop_install_dir/bin\"" "$HOME/.bashrc"; then
     cat <<EOF >>"$HOME/.bashrc"
-
 export PATH="\$PATH:$btop_install_dir/bin"
 EOF
 fi
@@ -997,9 +997,8 @@ cd "$HOME" || {
     exit 1
 }
 
-if [[ "$fresh_install" == true ]]; then
+if ! grep -qsF "export PATH=\"\$PATH:$tmux_git_dir\"" "$HOME/.bashrc"; then
     cat <<EOF >>"$HOME/.bashrc"
-
 export PATH="\$PATH:$tmux_git_dir"
 EOF
 fi
@@ -1412,7 +1411,7 @@ if [ "$fresh_install" = true ] || [ "$llvm_update" = true ]; then
     echo "llvm build complete"
 fi
 
-if [[ "$fresh_install" == true ]]; then
+if ! grep -qsF "export PATH=\"\$PATH:$llvm_git_dir/build/bin\"" "$HOME/.bashrc"; then
     cat <<EOF >>"$HOME/.bashrc"
 export PATH="\$PATH:$llvm_git_dir/build/bin"
 EOF
