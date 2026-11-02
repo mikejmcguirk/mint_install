@@ -187,11 +187,19 @@ if [[ "$magick_update" == true ]]; then
         }
     fi
 
+    # Drop a previous /usr/local install and wipe stale objects. Incremental rebuilds
+    # after --without-x leave MagickPrivate X11 symbols (e.g. XUserPreferences)
+    # undefined in libMagickCore.
+    if [[ -f Makefile ]]; then
+        sudo make uninstall || true
+        make distclean || true
+    fi
+    git clean -xffd
+
     # betterlockscreen only needs the command-line tools and JPEG/PNG/font support;
     # skip unused language bindings, X11 utilities, static archives, and docs.
     sudo apt install -y build-essential pkg-config libjpeg-dev libpng-dev libfreetype6-dev
     CC="ccache gcc" CXX="ccache g++" ./configure \
-        --disable-dependency-tracking \
         --disable-docs \
         --disable-static \
         --enable-shared \
