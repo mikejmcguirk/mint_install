@@ -153,7 +153,7 @@ fi
 # of the build times.
 
 magick_repo="https://github.com/ImageMagick/ImageMagick"
-magick_tag="7.1.2-29"
+magick_tag="7.1.2-35"
 magick_update=false
 for arg in "$@"; do
     if [[ "$arg" == "magick" || "$arg" == "all" ]]; then
@@ -381,7 +381,7 @@ curl -fsS https://dl.brave.com/install.sh | sh
 sudo apt remove fzf
 
 fzf_repo="https://github.com/junegunn/fzf"
-fzf_tag="v0.74.2"
+fzf_tag="v0.74.5"
 fzf_update=false
 for arg in "$@"; do
     if [[ "$arg" == "fzf" || "$arg" == "all" ]]; then
@@ -503,7 +503,7 @@ cd "$HOME" || {
 ##############
 
 # https://go.dev/dl/
-go_dl_url="https://go.dev/dl/go1.26.5.linux-amd64.tar.gz"
+go_dl_url="https://go.dev/dl/go1.27.3.linux-amd64.tar.gz"
 go_tar=$(basename "$go_dl_url")
 
 go_update=false
@@ -569,7 +569,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 ######
 
 # https://github.com/aristocratos/btop
-btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.7/btop-x86_64-unknown-linux-musl.tar.gz"
+btop_url="https://github.com/aristocratos/btop/releases/download/v1.4.8/btop-x86_64-unknown-linux-musl.tar.gz"
 btop_file=$(basename "$btop_url")
 
 btop_update=false
@@ -682,7 +682,7 @@ cd "$HOME" || {
 
 # https://github.com/nvm-sh/nvm
 # Check that the install cmd is up to date as well
-nvm_install_url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh"
+nvm_install_url="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh"
 nvm_update=false
 for arg in "$@"; do
     if [[ "$arg" == "nvm" || "$arg" == "all" ]]; then
@@ -723,7 +723,7 @@ npm i -g "bash-language-server"@latest
 
 # https://www.nerdfonts.com/font-downloads
 # Cousine version: 1.211
-nerd_font_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.0/Cousine.zip"
+nerd_font_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/Cousine.zip"
 nerd_font_filename=$(basename "$nerd_font_url")
 
 nerd_font_update=false
@@ -926,7 +926,7 @@ fi
 ######
 
 tmux_url="https://github.com/tmux/tmux"
-tmux_branch="3.7b"
+tmux_branch="3.8"
 tpm_repo="https://github.com/tmux-plugins/tpm"
 tmux_power_repo="https://github.com/wfxr/tmux-power"
 
@@ -1213,7 +1213,7 @@ cd "$HOME" || {
     exit 1
 }
 
-biome_tag="@biomejs/biome@2.5.14"
+biome_tag="@biomejs/biome@2.6.4"
 biome_asset="biome-linux-x64"
 biome_url="https://github.com/biomejs/biome/releases/download/${biome_tag}/${biome_asset}"
 biome_update=false
@@ -1331,11 +1331,11 @@ fi
 # C Ecosystem
 #############
 
-llvm_tag="llvmorg-23.1.2"
+llvm_tag="llvmorg-23.1.4"
 llvm_version="${llvm_tag#llvmorg-}"
 llvm_asset="LLVM-${llvm_version}-Linux-X64.tar.xz"
 llvm_url="https://github.com/llvm/llvm-project/releases/download/${llvm_tag}/${llvm_asset}"
-llvm_sha256="b5ed9675149cc837c282e9b6962c276c9fa62863d5b2f91537b60848552995b7"
+llvm_sha256="25d814fda50d5fb0084b42be09605d8b1595d49d5e2e03a3345d7e112ff6f9f3"
 llvm_tar="$HOME/.local/$llvm_asset"
 llvm_update=false
 for arg in "$@"; do
@@ -1418,22 +1418,6 @@ export PATH="\$PATH:$llvm_bin_dir"
 EOF
 fi
 
-# Previous source build (slow); retained for reference if a custom target set is needed.
-# llvm_repo="https://github.com/llvm/llvm-project/"
-# sudo apt install -y build-essential cmake ninja-build python3 zlib1g-dev libxml2-dev libzstd-dev
-# git clone "$llvm_repo" "$llvm_dir"
-# cd "$llvm_dir" || exit 1
-# git checkout --force "$llvm_tag" || exit 1
-# llvm_build_dir="$llvm_dir/build"
-# mkdir -p "$llvm_build_dir"
-# cd "$llvm_build_dir" || exit 1
-# cmake ../llvm \
-#     -G Ninja \
-#     -DCMAKE_BUILD_TYPE=Release \
-#     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
-#     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM;RISCV;WebAssembly"
-# ninja
-
 cd "$HOME" || {
     echo "Error: Cannot cd to $HOME"
     exit 1
@@ -1443,7 +1427,7 @@ cd "$HOME" || {
 # Odin Ecosystem #
 ##################
 
-odin_tag="dev-2026-09"
+odin_tag="dev-2026-10"
 odin_url="https://github.com/odin-lang/Odin/releases/download/${odin_tag}/odin-linux-amd64-${odin_tag}.tar.gz"
 odin_tar=$(basename "$odin_url")
 odin_update=false
