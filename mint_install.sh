@@ -759,6 +759,12 @@ fi
 # Ghostty
 #########
 
+# TODO-DEP: According to the bot we cannot go to 1.4.0 until Mint 26.04, which has the proper
+# GTK update.
+# Re-ask the bot about the various issues and workarounds here, including the GTK compile,
+# manual blueprint install, and patchelf usage. I... just kinda can't believe the patchelf thing
+# isn't fixed yet.
+
 # NOTE: The build command is currently altered due to a problem build dep. Per the issue below, a
 # branch will be cut to address, and the build command needs to be reverted
 # https://github.com/ghostty-org/ghostty/issues/9606
@@ -1325,12 +1331,12 @@ fi
 # C Ecosystem
 #############
 
-# TODO: For VM Tests I think there needs to be a way to skip this one. Takes hours even on a real
-# computer.
-# Last because clangd takes a while to build
-
-llvm_repo="https://github.com/llvm/llvm-project/"
 llvm_tag="llvmorg-23.1.2"
+llvm_version="${llvm_tag#llvmorg-}"
+llvm_asset="LLVM-${llvm_version}-Linux-X64.tar.xz"
+llvm_url="https://github.com/llvm/llvm-project/releases/download/${llvm_tag}/${llvm_asset}"
+llvm_sha256="b5ed9675149cc837c282e9b6962c276c9fa62863d5b2f91537b60848552995b7"
+llvm_tar="$HOME/.local/$llvm_asset"
 llvm_update=false
 for arg in "$@"; do
     if [[ "$arg" == "llvm" || "$arg" == "all" ]]; then
@@ -1349,55 +1355,84 @@ if [ "$fresh_install" = true ] && [ "$llvm_update" != true ]; then
     echo "Installing llvm..."
 fi
 
-llvm_git_dir="$HOME/.local/bin/llvm"
-[ ! -d "$llvm_git_dir" ] && mkdir -p "$llvm_git_dir"
-
-if [[ "$fresh_install" == true ]]; then
-    git clone $llvm_repo "$llvm_git_dir"
-fi
-
-cd "$llvm_git_dir" || {
-    echo "Error: Cannot cd to $llvm_git_dir"
-    exit 1
-}
-
-if [[ "$llvm_update" == true ]]; then
-    git checkout --force main
-    git pull
-fi
+llvm_dir="$HOME/.local/bin/llvm"
+llvm_bin_dir="$llvm_dir/bin"
 
 if [ "$fresh_install" = true ] || [ "$llvm_update" = true ]; then
-    sudo apt install -y \
-        build-essential cmake ninja-build python3 zlib1g-dev libxml2-dev libzstd-dev
-    git checkout --force "$llvm_tag" || {
-        echo "Error: Cannot checkout $llvm_tag"
+    sudo apt install -y xz-utils
+
+    # Remove apt-installed toolchains so their binaries cannot shadow the release in PATH.
+    # Keep shared libraries (libllvm*, libclang*) since Mesa and other system packages use them.
+    mapfile -t llvm_apt_packages < <(
+        dpkg-query -W -f='${db:Status-Status}\t${binary:Package}\n' 2>/dev/null |
+            awk '$1 == "installed" { print $2 }' |
+            grep -E '^(clang|clangd|clang-format|clang-tidy|clang-tools|lld|lldb|llvm|llvm-runtime)(-[0-9]+(-dev)?)?(:[[:alnum:]-]+)?$' || true
+    )
+    if ((${#llvm_apt_packages[@]})); then
+        sudo apt remove -y "${llvm_apt_packages[@]}"
+    fi
+
+    mkdir -p "$HOME/.local" "$HOME/.local/bin"
+    llvm_staging_dir=$(mktemp -d "$HOME/.local/bin/llvm.XXXXXX") || {
+        echo "Error: Cannot create temporary LLVM install directory"
         exit 1
     }
 
-    llvm_build_dir="$llvm_git_dir/build"
-    [ ! -d "$llvm_build_dir" ] && mkdir -p "$llvm_build_dir"
-    cd "$llvm_build_dir"
+    if ! wget -O "$llvm_tar" "$llvm_url"; then
+        echo "Error: Failed to download LLVM from $llvm_url"
+        rm -rf "$llvm_staging_dir"
+        exit 1
+    fi
 
-    # cmake "$llvm_git_dir/llvm/" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra"
-    # Compile non-native architectures for the benefit of Odin
-    cmake ../llvm \
-        -G Ninja \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
-        -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM;RISCV;WebAssembly"
+    if ! echo "$llvm_sha256  $llvm_tar" | sha256sum --check --status; then
+        echo "Error: LLVM archive checksum verification failed"
+        rm -f "$llvm_tar"
+        rm -rf "$llvm_staging_dir"
+        exit 1
+    fi
 
-    # cd "$llvm_build_dir"
-    # cmake --build "$llvm_build_dir" --target clang clangd llvm-config
-    # ninja -C "$llvm_build_dir" clang clangd llvm-config
-    ninja
-    echo "llvm build complete"
+    if ! tar -xJf "$llvm_tar" -C "$llvm_staging_dir" --strip-components=1; then
+        echo "Error: Failed to extract LLVM archive"
+        rm -rf "$llvm_staging_dir"
+        rm -f "$llvm_tar"
+        exit 1
+    fi
+    rm -f "$llvm_tar"
+
+    if [[ ! -x "$llvm_staging_dir/bin/clang" || ! -x "$llvm_staging_dir/bin/clangd" ]]; then
+        echo "Error: clang or clangd missing from the extracted LLVM archive"
+        rm -rf "$llvm_staging_dir"
+        exit 1
+    fi
+
+    # Replace the previous source checkout/build only after the archive is validated.
+    rm -rf "$llvm_dir"
+    mv "$llvm_staging_dir" "$llvm_dir"
+    echo "LLVM install complete"
 fi
 
-if ! grep -qsF "export PATH=\"\$PATH:$llvm_git_dir/build/bin\"" "$HOME/.bashrc"; then
+export PATH="$PATH:$llvm_bin_dir"
+if ! grep -qsF "export PATH=\"\$PATH:$llvm_bin_dir\"" "$HOME/.bashrc"; then
     cat <<EOF >>"$HOME/.bashrc"
-export PATH="\$PATH:$llvm_git_dir/build/bin"
+export PATH="\$PATH:$llvm_bin_dir"
 EOF
 fi
+
+# Previous source build (slow); retained for reference if a custom target set is needed.
+# llvm_repo="https://github.com/llvm/llvm-project/"
+# sudo apt install -y build-essential cmake ninja-build python3 zlib1g-dev libxml2-dev libzstd-dev
+# git clone "$llvm_repo" "$llvm_dir"
+# cd "$llvm_dir" || exit 1
+# git checkout --force "$llvm_tag" || exit 1
+# llvm_build_dir="$llvm_dir/build"
+# mkdir -p "$llvm_build_dir"
+# cd "$llvm_build_dir" || exit 1
+# cmake ../llvm \
+#     -G Ninja \
+#     -DCMAKE_BUILD_TYPE=Release \
+#     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
+#     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;ARM;RISCV;WebAssembly"
+# ninja
 
 cd "$HOME" || {
     echo "Error: Cannot cd to $HOME"
