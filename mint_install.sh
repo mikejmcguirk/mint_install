@@ -91,16 +91,16 @@ if [[ "$fresh_install" == true && "$i3lock_update" != true ]]; then
     echo "Installing i3lock-color..."
 fi
 
-sudo apt remove -y i3lock
-sudo apt install -y \
-    autoconf gcc make pkg-config libpam0g-dev libcairo2-dev libfontconfig1-dev \
-    libxcb-composite0-dev libev-dev libx11-xcb-dev libxcb-xkb-dev \
-    libxcb-xinerama0-dev libxcb-randr0-dev libxcb-image0-dev libxcb-util0-dev \
-    libxcb-xrm-dev libxkbcommon-dev libxkbcommon-x11-dev libjpeg-dev libgif-dev
-
 i3_color_git_dir="$HOME/.local/bin/i3lock-color"
 i3_color_build_dir="$i3_color_git_dir/build"
 if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
+    sudo apt remove -y i3lock
+    sudo apt install -y \
+        autoconf gcc make pkg-config libpam0g-dev libcairo2-dev libfontconfig1-dev \
+        libxcb-composite0-dev libev-dev libx11-xcb-dev libxcb-xkb-dev \
+        libxcb-xinerama0-dev libxcb-randr0-dev libxcb-image0-dev libxcb-util0-dev \
+        libxcb-xrm-dev libxkbcommon-dev libxkbcommon-x11-dev libjpeg-dev libgif-dev
+
     mkdir -p "$i3_color_git_dir"
     cd "$i3_color_git_dir" || {
         echo "Error: Cannot cd to $i3_color_git_dir"
@@ -189,6 +189,7 @@ if [[ "$magick_update" == true ]]; then
 
     # betterlockscreen only needs the command-line tools and JPEG/PNG/font support;
     # skip unused language bindings, X11 utilities, static archives, and docs.
+    sudo apt install -y build-essential pkg-config libjpeg-dev libpng-dev libfreetype6-dev
     CC="ccache gcc" CXX="ccache g++" ./configure \
         --disable-dependency-tracking \
         --disable-docs \
@@ -231,6 +232,7 @@ fi
 # Note: The install script will fail if it fails to find any of the deps, including
 # i3lock-color and ImageMagick
 if [[ "$fresh_install" == true || "$bls_update" == true ]]; then
+    sudo apt install -y feh bc xautolock
     if [ -z "$bls_url" ]; then
         echo "bls_url not set. Exiting..."
         exit 1
@@ -242,6 +244,7 @@ fi
 # Python Ecosystem
 ##################
 
+sudo apt install -y python3-full python3-pip pipx
 pipx upgrade-all
 
 #########
@@ -322,6 +325,7 @@ if [ "$fresh_install" = true ] && [ "$discord_update" != true ]; then
 fi
 
 if [[ "$fresh_install" == true || "$discord_update" == true ]]; then
+    sudo apt install -y curl file
     if [ -z "$discord_url" ]; then
         echo "Error: discord_url must be set."
         exit 1
@@ -363,6 +367,7 @@ if [[ "$fresh_install" == true ]]; then
 fi
 
 # Just always do this since the keys can update
+sudo apt install -y curl
 curl -fsS https://dl.brave.com/install.sh | sh
 
 ##########################################
@@ -429,10 +434,6 @@ if [ -d "$bad_neovim_dir" ]; then
     rm -rf "$bad_neovim_dir"
 fi
 
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install ninja-build gettext cmake curl build-essential git
-fi
-
 if [ -z "$nvim_repo" ] || [ -z "$nvim_tag" ]; then
     echo "Error: nvim_url and nvim_tag must be set"
     exit 1
@@ -454,6 +455,10 @@ done
 
 if [ "$fresh_install" = true ] && [ "$nvim_update" != true ]; then
     echo "Installing nvim..."
+fi
+
+if [[ "$fresh_install" == true || "$nvim_update" == true ]]; then
+    sudo apt install -y ninja-build gettext cmake curl build-essential git
 fi
 
 nvim_git_dir="$HOME/.local/bin/neovim"
@@ -610,10 +615,6 @@ fi
 # Lua Ecosystem
 ###############
 
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install build-essential libreadline-dev unzip
-fi
-
 # https://luajit.org/status.html
 luajit_repo="https://luajit.org/git/luajit.git"
 # NOTE: The tag is regularly updated with fixes/backports
@@ -635,6 +636,10 @@ done
 
 if [ "$fresh_install" = true ] && [ "$luajit_update" != true ]; then
     echo "Installing luajit..."
+fi
+
+if [[ "$fresh_install" == true || "$luajit_update" == true ]]; then
+    sudo apt install -y build-essential libreadline-dev unzip
 fi
 
 luajit_git_dir="$HOME/.local/bin/luajit"
@@ -736,6 +741,7 @@ if [[ "$fresh_install" == true || "$nerd_font_update" != true ]]; then
 fi
 
 if [[ "$fresh_install" == true || "$nerd_font_update" == true ]]; then
+    sudo apt install -y unzip
     fonts_dir="$HOME/.fonts"
     [ ! -d "$fonts_dir" ] && mkdir -p "$fonts_dir"
 
@@ -802,31 +808,6 @@ if [ "$fresh_install" = true ]; then
     echo "Installing zig..."
     echo "Installing blueprint-compiler..."
 
-    # Could be repeats, but here for insurance/documentation
-    sudo apt install -y libgtk-4-dev
-    sudo apt install -y libgtk4-layer-shell-dev
-    sudo apt install -y libadwaita-1-dev
-    sudo apt install -y libxml2-utils
-    sudo apt install -y git
-    # sudo apt install -y blueprint-compiler # Repo version is out of date
-    sudo apt install -y pkg-config
-    sudo apt install -y gettext
-    # ThePrimeagen has these included
-    # sudo apt install -y llvm
-    # sudo apt install -y lld
-    # sudo apt install -y llvm-dev
-    # sudo apt install -y liblld-dev
-    # sudo apt install -y clang
-    # sudo apt install -y libclang-dev
-    # Other stuff that might help
-    # sudo apt install -y libegl1-mesa-dev
-    # sudo apt install -y libvulkan-dev
-
-    # For blueprint-compiler
-    sudo apt install -y ninja-build
-    sudo apt install -y meson
-    sudo apt install -y libglib2.0-dev
-
     [ ! -d "$ziglang_dir" ] && sudo mkdir -p "$ziglang_dir"
     [ ! -d "$ghostty_dir" ] && mkdir -p "$ghostty_dir"
 fi
@@ -864,6 +845,7 @@ if [[ "$blueprint_update" == true ]]; then
 fi
 
 if [ "$fresh_install" = true ] || [ "$blueprint_update" = true ]; then
+    sudo apt install -y git ninja-build meson libglib2.0-dev
     git checkout --force "$blueprint_tag" || {
         echo "Error: Cannot checkout $blueprint_tag"
         exit 1
@@ -883,6 +865,9 @@ cd "$HOME" || {
 }
 
 if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
+    sudo apt install -y \
+        git libgtk-4-dev libgtk4-layer-shell-dev libadwaita-1-dev libxml2-utils \
+        pkg-config gettext patchelf
     cd "$ghostty_dir" || {
         echo "Error: Cannot cd to $ghostty_dir"
         exit 1
@@ -897,8 +882,6 @@ if [ "$ghostty_update" = true ]; then
     git checkout --force main
     git pull
 fi
-
-sudo apt install patchelf
 
 if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     git checkout --force "$ghostty_tag"
@@ -982,6 +965,8 @@ if [[ "$tmux_update" == true ]]; then
 fi
 
 if [ "$fresh_install" = true ] || [ "$tmux_update" = true ]; then
+    sudo apt install -y \
+        build-essential bison libncurses-dev libevent-dev automake autoconf libssl-dev pkg-config
     git checkout --force "$tmux_branch" || {
         echo "Error: Cannot checkout $tmux_branch"
         exit 1
@@ -1049,12 +1034,9 @@ for arg in "$@"; do
     fi
 done
 
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install wordnet
-fi
-
 words_git_dir="$HOME/.local/bin/words"
 if [[ "$fresh_install" == true || "$words_update" == true ]]; then
+    sudo apt install -y wordnet
     [ ! -d "$words_git_dir" ] && mkdir -p "$words_git_dir"
     cd "$words_git_dir" || {
         echo "Error: Cannot cd to $words_git_dir"
@@ -1108,6 +1090,7 @@ fi
 superhtml_dir="$HOME/.local/bin/superhtml"
 
 if [ "$fresh_install" = true ] || [ "$superhtml_update" = true ]; then
+    sudo apt install -y xz-utils
     if [ -z "$superhtml_url" ] || [ -z "$superhtml_tar" ]; then
         echo "Error: superhtml_url and superhtml_tar must be set."
         exit 1
@@ -1295,6 +1278,7 @@ cd "$HOME" || {
 # Rust URL
 # Check curl cmd as well
 rustup_url="https://sh.rustup.rs"
+sudo apt install -y build-essential libssl-dev pkg-config
 if [ "$fresh_install" = true ]; then
     echo "Installing rustup..."
 
@@ -1335,10 +1319,6 @@ if [[ "$fresh_install" == true ]]; then
     "$cargo_bin" install --locked --git https://github.com/Feel-ix-343/markdown-oxide.git markdown-oxide
 else
     $cargo_bin install-update -a
-fi
-
-if [[ "$fresh_install" == true ]]; then
-    sudo apt install build-essential libreadline-dev unzip
 fi
 
 #############
@@ -1387,6 +1367,8 @@ if [[ "$llvm_update" == true ]]; then
 fi
 
 if [ "$fresh_install" = true ] || [ "$llvm_update" = true ]; then
+    sudo apt install -y \
+        build-essential cmake ninja-build python3 zlib1g-dev libxml2-dev libzstd-dev
     git checkout --force "$llvm_tag" || {
         echo "Error: Cannot checkout $llvm_tag"
         exit 1
@@ -1514,6 +1496,7 @@ ols_dir="$HOME/.local/bin/ols"
 ols_asset="ols-x86_64-unknown-linux-gnu.zip"
 
 if [ "$fresh_install" = true ] || [ "$ols_update" = true ]; then
+    sudo apt install -y jq
     if ! command -v jq >/dev/null 2>&1; then
         echo "Error: jq is required to resolve the latest ols release"
         exit 1

@@ -37,7 +37,6 @@ sudo apt install -y vim
 sudo apt install -y sqlite3
 sudo apt install -y virtualbox
 
-sudo apt install -y ninja-build
 sudo apt install -y shellcheck
 
 # perf would be installed here if needed
@@ -88,7 +87,6 @@ sudo apt install -y natpmpc
 sudo apt install -y vlc
 sudo apt install -y hexchat
 sudo apt install -y libreoffice
-sudo apt install -y wordnet
 sudo apt install -y qbittorrent
 sudo apt install -y kolourpaint
 sudo apt install -y unrar
@@ -161,12 +159,10 @@ done
 ################
 
 sudo apt install -y i3
-sudo apt install -y xautolock
 sudo apt install -y playerctl # Detect playing media to avoid screen lock
 
 sudo apt install -y easyeffects
 
-sudo apt install -y feh
 sudo apt install -y picom
 
 sudo apt install -y polybar
@@ -223,14 +219,6 @@ fi
 
 echo "Successfully configured $reboot_shutdown_file"
 
-#########################
-# betterlockscreen Deps #
-#########################
-
-sudo apt install -y feh # for wallpaper
-sudo apt install -y bc
-sudo apt install -y xautolock
-
 ##################
 # Python Ecosystem
 ##################
@@ -254,19 +242,3 @@ pipx install ruff
 pipx install python-lsp-server[all]
 pipx inject python-lsp-server pylsp-mypy
 pipx install ty
-
-#############
-# Tmux Deps #
-#############
-
-sudo apt install -y bison
-sudo apt install -y libncurses-dev
-sudo apt install -y libevent-dev
-sudo apt install -y automake
-sudo apt install -y autoconf
-
-##############
-# Other Deps #
-##############
-
-sudo apt install -y libssl-dev
