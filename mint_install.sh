@@ -167,6 +167,10 @@ done
 
 magick_git_dir="$HOME/.local/bin/magick"
 if [[ "$magick_update" == true ]]; then
+    if ! command -v ccache >/dev/null 2>&1; then
+        sudo apt install -y ccache
+    fi
+
     mkdir -p "$magick_git_dir"
     cd "$magick_git_dir" || {
         echo "Error: Cannot cd to $magick_git_dir"
@@ -183,7 +187,19 @@ if [[ "$magick_update" == true ]]; then
         }
     fi
 
-    ./configure
+    # betterlockscreen only needs the command-line tools and JPEG/PNG/font support;
+    # skip unused language bindings, X11 utilities, static archives, and docs.
+    CC="ccache gcc" CXX="ccache g++" ./configure \
+        --disable-dependency-tracking \
+        --disable-docs \
+        --disable-static \
+        --enable-shared \
+        --without-perl \
+        --without-magick-plus-plus \
+        --without-x \
+        --with-jpeg \
+        --with-png \
+        --with-freetype
     make -j"$(nproc)"
     sudo make install
     sudo ldconfig /usr/local/lib
