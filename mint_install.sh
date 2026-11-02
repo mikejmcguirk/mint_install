@@ -66,6 +66,25 @@ if [[ "$fresh_install" == true ]]; then
     . "$HOME/mint_install/bootstrap.sh"
 fi
 
+# Clone $1 into $2 when the checkout is missing so an update of a newly added
+# program installs it instead of failing. Sets git_repo_cloned=true on clone.
+ensure_git_repo() {
+    local repo="$1"
+    local dest="$2"
+    git_repo_cloned=false
+    if [[ -d "$dest/.git" ]]; then
+        return 0
+    fi
+
+    echo "Missing git checkout at $dest; cloning $repo..."
+    rm -rf "$dest"
+    git clone "$repo" "$dest" || {
+        echo "Error: Cannot clone $repo into $dest"
+        exit 1
+    }
+    git_repo_cloned=true
+}
+
 #####################################
 # i3lock-color (betterlockscreen dep)
 #####################################
@@ -402,16 +421,14 @@ done
 
 fzf_git_dir="$HOME/.local/bin/fzf"
 if [[ "$fresh_install" == true || "$fzf_update" == true ]]; then
-    [ ! -d "$fzf_git_dir" ] && mkdir -p "$fzf_git_dir"
+    ensure_git_repo "$fzf_repo" "$fzf_git_dir"
     cd "$fzf_git_dir" || {
         echo "Error: Cannot cd to $fzf_git_dir"
         exit 1
     }
 fi
 
-if [[ "$fresh_install" == true ]]; then
-    git clone $fzf_repo "$fzf_git_dir"
-elif [[ "$fzf_update" == true ]]; then
+if [[ "$fzf_update" == true && "$git_repo_cloned" == false ]]; then
     git checkout --force master
     git pull
 fi
@@ -470,20 +487,17 @@ if [[ "$fresh_install" == true || "$nvim_update" == true ]]; then
 fi
 
 nvim_git_dir="$HOME/.local/bin/neovim"
-[ ! -d "$nvim_git_dir" ] && mkdir -p "$nvim_git_dir"
+if [[ "$fresh_install" == true || "$nvim_update" == true ]]; then
+    ensure_git_repo "$nvim_repo" "$nvim_git_dir"
+    cd "$nvim_git_dir" || {
+        echo "Error: Cannot cd to $nvim_git_dir"
+        exit 1
+    }
 
-if [[ "$fresh_install" == true ]]; then
-    git clone $nvim_repo "$nvim_git_dir"
-fi
-
-cd "$nvim_git_dir" || {
-    echo "Error: Cannot cd to $nvim_git_dir"
-    exit 1
-}
-
-if [[ "$nvim_update" == true ]]; then
-    git checkout --force master
-    git pull
+    if [[ "$nvim_update" == true && "$git_repo_cloned" == false ]]; then
+        git checkout --force master
+        git pull
+    fi
 fi
 
 if [ "$fresh_install" = true ] || [ "$nvim_update" = true ]; then
@@ -651,20 +665,17 @@ if [[ "$fresh_install" == true || "$luajit_update" == true ]]; then
 fi
 
 luajit_git_dir="$HOME/.local/bin/luajit"
-[ ! -d "$luajit_git_dir" ] && mkdir -p "$luajit_git_dir"
+if [[ "$fresh_install" == true || "$luajit_update" == true ]]; then
+    ensure_git_repo "$luajit_repo" "$luajit_git_dir"
+    cd "$luajit_git_dir" || {
+        echo "Error: Cannot cd to $luajit_git_dir"
+        exit 1
+    }
 
-if [[ "$fresh_install" == true ]]; then
-    git clone $luajit_repo "$luajit_git_dir"
-fi
-
-cd "$luajit_git_dir" || {
-    echo "Error: Cannot cd to $luajit_git_dir"
-    exit 1
-}
-
-if [[ "$luajit_update" == true ]]; then
-    git checkout --force master
-    git pull
+    if [[ "$luajit_update" == true && "$git_repo_cloned" == false ]]; then
+        git checkout --force master
+        git pull
+    fi
 fi
 
 if [ "$fresh_install" = true ] || [ "$luajit_update" = true ]; then
@@ -817,16 +828,27 @@ for arg in "$@"; do
     fi
 done
 
+blueprint_git_dir="$HOME/.local/bin/blueprint-compiler"
+
+if [[ "$ghostty_update" == true ]]; then
+    if [[ ! -x "$ziglang_dir/$zig_dir/zig" ]]; then
+        echo "zig missing; installing before Ghostty..."
+        zig_update=true
+    fi
+    if [[ ! -d "$blueprint_git_dir/.git" ]]; then
+        echo "blueprint-compiler missing; installing before Ghostty..."
+        blueprint_update=true
+    fi
+fi
+
 if [ "$fresh_install" = true ]; then
     echo "Installing Ghostty..."
     echo "Installing zig..."
     echo "Installing blueprint-compiler..."
-
-    [ ! -d "$ziglang_dir" ] && sudo mkdir -p "$ziglang_dir"
-    [ ! -d "$ghostty_dir" ] && mkdir -p "$ghostty_dir"
 fi
 
 if [ "$fresh_install" = true ] || [ "$zig_update" = true ]; then
+    sudo mkdir -p "$ziglang_dir"
     sudo wget -P $ziglang_dir $zig_link
     sudo tar -Jxf "$zig_filepath" -C "$ziglang_dir"
     sudo rm "$zig_filepath"
@@ -840,22 +862,17 @@ if [ "$fresh_install" = true ] || [ "$zig_update" = true ] || [ "$ghostty_update
     fi
 fi
 
-blueprint_git_dir="$HOME/.local/bin/blueprint-compiler"
-[ ! -d "$blueprint_git_dir" ] && mkdir -p "$blueprint_git_dir"
-if [[ "$fresh_install" == true ]]; then
-    git clone $blueprint_repo "$blueprint_git_dir"
-fi
-
 if [ "$fresh_install" = true ] || [ "$blueprint_update" = true ]; then
+    ensure_git_repo "$blueprint_repo" "$blueprint_git_dir"
     cd "$blueprint_git_dir" || {
         echo "Error: Cannot cd to $blueprint_git_dir"
         exit 1
     }
-fi
 
-if [[ "$blueprint_update" == true ]]; then
-    git checkout --force main
-    git pull
+    if [[ "$blueprint_update" == true && "$git_repo_cloned" == false ]]; then
+        git checkout --force main
+        git pull
+    fi
 fi
 
 if [ "$fresh_install" = true ] || [ "$blueprint_update" = true ]; then
@@ -882,19 +899,16 @@ if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
     sudo apt install -y \
         git libgtk-4-dev libgtk4-layer-shell-dev libadwaita-1-dev libxml2-utils \
         pkg-config gettext patchelf
+    ensure_git_repo "$ghostty_repo" "$ghostty_dir"
     cd "$ghostty_dir" || {
         echo "Error: Cannot cd to $ghostty_dir"
         exit 1
     }
-fi
 
-if [ "$fresh_install" = true ]; then
-    git clone $ghostty_repo .
-fi
-
-if [ "$ghostty_update" = true ]; then
-    git checkout --force main
-    git pull
+    if [[ "$ghostty_update" == true && "$git_repo_cloned" == false ]]; then
+        git checkout --force main
+        git pull
+    fi
 fi
 
 if [ "$fresh_install" = true ] || [ "$ghostty_update" = true ]; then
@@ -962,20 +976,17 @@ if [ "$fresh_install" = true ] && [ "$tmux_update" != true ]; then
 fi
 
 tmux_git_dir="$HOME/.local/bin/tmux"
-[ ! -d "$tmux_git_dir" ] && mkdir -p "$tmux_git_dir"
+if [[ "$fresh_install" == true || "$tmux_update" == true ]]; then
+    ensure_git_repo "$tmux_url" "$tmux_git_dir"
+    cd "$tmux_git_dir" || {
+        echo "Error: Cannot cd to $tmux_git_dir"
+        exit 1
+    }
 
-if [[ "$fresh_install" == true ]]; then
-    git clone $tmux_url "$tmux_git_dir"
-fi
-
-cd "$tmux_git_dir" || {
-    echo "Error: Cannot cd to $tmux_git_dir"
-    exit 1
-}
-
-if [[ "$tmux_update" == true ]]; then
-    git checkout --force master
-    git pull
+    if [[ "$tmux_update" == true && "$git_repo_cloned" == false ]]; then
+        git checkout --force master
+        git pull
+    fi
 fi
 
 if [ "$fresh_install" = true ] || [ "$tmux_update" = true ]; then
@@ -1014,13 +1025,13 @@ if [ "$fresh_install" = true ] || [ "$tmux_update" = true ]; then
     fi
 fi
 
-if [[ "$fresh_install" == true ]]; then
-    git clone $tpm_repo "$tpm_dir"
-    git clone $tmux_power_repo "$power_dir"
+if [ "$fresh_install" = true ] || [ "$tmux_update" = true ]; then
+    ensure_git_repo "$tpm_repo" "$tpm_dir"
+    ensure_git_repo "$tmux_power_repo" "$power_dir"
 fi
 
 # FUTURE: Can't the plugin manager just handle this?
-if [[ "$tmux_update" == true ]]; then
+if [[ "$tmux_update" == true && "$git_repo_cloned" == false ]]; then
     cd "$power_dir" || {
         echo "Error: Cannot cd to $power_dir"
         exit 1
@@ -1051,18 +1062,16 @@ done
 words_git_dir="$HOME/.local/bin/words"
 if [[ "$fresh_install" == true || "$words_update" == true ]]; then
     sudo apt install -y wordnet
-    [ ! -d "$words_git_dir" ] && mkdir -p "$words_git_dir"
+    ensure_git_repo "$words_repo" "$words_git_dir"
     cd "$words_git_dir" || {
         echo "Error: Cannot cd to $words_git_dir"
         exit 1
     }
-fi
 
-if [[ "$fresh_install" == true ]]; then
-    git clone $words_repo "$words_git_dir"
-elif [[ "$words_update" == true ]]; then
-    git checkout --force master
-    git pull
+    if [[ "$words_update" == true && "$git_repo_cloned" == false ]]; then
+        git checkout --force master
+        git pull
+    fi
 fi
 
 #############
