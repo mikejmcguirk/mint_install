@@ -221,33 +221,6 @@ EOF
 
 echo "Successfully configured $reboot_shutdown_file"
 
-#####################
-# i3lock-color Deps #
-#####################
-
-sudo apt remove -y i3lock
-
-sudo apt install -y autoconf
-sudo apt install -y gcc
-sudo apt install -y make
-sudo apt install -y pkg-config
-sudo apt install -y libpam0g-dev
-sudo apt install -y libcairo2-dev
-sudo apt install -y libfontconfig1-dev
-sudo apt install -y libxcb-composite0-dev
-sudo apt install -y libev-dev
-sudo apt install -y libx11-xcb-dev
-sudo apt install -y libxcb-xkb-dev
-sudo apt install -y libxcb-xinerama0-dev
-sudo apt install -y libxcb-randr0-dev
-sudo apt install -y libxcb-image0-dev
-sudo apt install -y libxcb-util0-dev
-sudo apt install -y libxcb-xrm-dev
-sudo apt install -y libxkbcommon-dev
-sudo apt install -y libxkbcommon-x11-dev
-sudo apt install -y libjpeg-dev
-sudo apt install -y libgif-dev
-
 #########################
 # betterlockscreen Deps #
 #########################

@@ -91,38 +91,56 @@ if [[ "$fresh_install" == true && "$i3lock_update" != true ]]; then
     echo "Installing i3lock-color..."
 fi
 
+sudo apt remove -y i3lock
+sudo apt install -y \
+    autoconf gcc make pkg-config libpam0g-dev libcairo2-dev libfontconfig1-dev \
+    libxcb-composite0-dev libev-dev libx11-xcb-dev libxcb-xkb-dev \
+    libxcb-xinerama0-dev libxcb-randr0-dev libxcb-image0-dev libxcb-util0-dev \
+    libxcb-xrm-dev libxkbcommon-dev libxkbcommon-x11-dev libjpeg-dev libgif-dev
+
 i3_color_git_dir="$HOME/.local/bin/i3lock-color"
+i3_color_build_dir="$i3_color_git_dir/build"
 if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
-    [ ! -d "$i3_color_git_dir" ] && mkdir -p "$i3_color_git_dir"
+    mkdir -p "$i3_color_git_dir"
     cd "$i3_color_git_dir" || {
         echo "Error: Cannot cd to $i3_color_git_dir"
         exit 1
     }
-fi
 
-if [ "$fresh_install" == true ]; then
-    git clone "$i3lock_repo" "$i3_color_git_dir"
-elif [ "$i3lock_update" == true ]; then
-    git checkout --force master
-    git pull
-fi
-
-i3_color_build_dir="$i3_color_git_dir/build"
-if [[ "$fresh_install" == true || "$i3lock_update" == true ]]; then
-    git checkout --force "$i3lock_tag" || {
-        echo "Error: Cannot checkout $i3lock_tag"
-        exit 1
-    }
+    if [[ ! -d .git ]]; then
+        git clone --depth 1 --branch "$i3lock_tag" "$i3lock_repo" . || {
+            echo "Error: Cannot clone i3lock-color at $i3lock_tag"
+            exit 1
+        }
+    else
+        git fetch --tags --force origin || {
+            echo "Error: Cannot fetch i3lock-color tags"
+            exit 1
+        }
+        git checkout --force "$i3lock_tag" || {
+            echo "Error: Cannot checkout $i3lock_tag"
+            exit 1
+        }
+    fi
 
     ./install-i3lock-color.sh
     # for betterlockscreen
-    mv "$i3_color_build_dir/i3lock" "$i3_color_build_dir/i3lock-color"
-    cd "$HOME"
+    mv -f "$i3_color_build_dir/i3lock" "$i3_color_build_dir/i3lock-color"
+    if [[ ! -x "$i3_color_build_dir/i3lock-color" ]]; then
+        echo "Error: i3lock-color binary missing after build at $i3_color_build_dir/i3lock-color"
+        exit 1
+    fi
+
+    cd "$HOME" || {
+        echo "Error: Cannot cd to $HOME"
+        exit 1
+    }
 fi
 
-if [[ "$fresh_install" == true ]]; then
+# Make it available in the current shell and persist PATH if missing.
+export PATH="$PATH:$i3_color_build_dir"
+if ! grep -qsF "export PATH=\"\$PATH:$i3_color_build_dir\"" "$HOME/.bashrc"; then
     cat <<EOF >>"$HOME/.bashrc"
-
 export PATH="\$PATH:$i3_color_build_dir"
 EOF
 fi
